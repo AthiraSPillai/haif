@@ -50,6 +50,7 @@ npm run haif -- validate
 - `templates/`: Markdown templates for core HAIF record types.
 - `examples/`: small-team, Jira-first, and Codex preflight examples.
 - `packages/cli/`: Node CLI for validation, record creation, preflight, overlap detection, review status, and context export.
+- `packages/python/`: Python SDK and CLI for AI engineering, data, and enterprise automation workflows.
 - `assets/`: diagrams for articles, docs, and presentations.
 
 ## Core Record Types
@@ -76,6 +77,19 @@ haif detect-overlap
 haif review-status
 haif export-context
 ```
+
+## Python Support
+
+HAIF also ships a dependency-free Python implementation:
+
+```bash
+set PYTHONPATH=packages/python/src
+python -m haif.cli init
+python -m haif.cli validate
+python -m haif.cli preflight --scope jira,docs
+```
+
+See [docs/python.md](docs/python.md).
 
 ## Human Review Rules
 

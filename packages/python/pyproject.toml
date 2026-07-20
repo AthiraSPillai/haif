@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "haif"
+version = "0.1.0"
+description = "Python CLI and SDK for the Human-Agent Intent Framework"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "Apache-2.0" }
+authors = [
+  { name = "HAIF Contributors" }
+]
+keywords = ["ai-agents", "coordination", "intent", "jira", "agents"]
+
+[project.scripts]
+haif-py = "haif.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
