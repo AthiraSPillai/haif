@@ -43,6 +43,38 @@ For local development without publishing the CLI package:
 npm run haif -- validate
 ```
 
+## Team Pilot Workflow
+
+Start with one project or workstream. Use HAIF as a lightweight pre-work alignment check before agents create Jira tickets, docs, designs, or code.
+
+```text
+Idea or agent suggestion
+        |
+        v
+HAIF Proposal
+        |
+        v human review
+HAIF Intent
+        |
+        v
+Jira ticket / design / implementation
+        |
+        v
+PR or final output links back to HAIF Intent
+```
+
+Recommended first team rule:
+
+> Agents can propose work, summarize context, and draft implementation plans, but committed Jira tickets and design direction should link to a human-reviewed HAIF intent.
+
+For a small pilot, start with only three record types:
+
+- `Proposal`: possible work from a human or agent.
+- `Intent`: accepted work with owner, scope, affected systems, and related context.
+- `Decision`: reviewed direction that agents and humans can treat as current.
+
+Add the rest of the lifecycle after the team has used this for a few real tasks.
+
 ## Repo Contents
 
 - `docs/`: framework docs, lifecycle, review gates, Jira/Codex/Claude/GitHub guidance, and adoption playbook.
