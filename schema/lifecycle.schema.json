@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://haif.dev/schema/lifecycle.schema.json",
+  "title": "HAIF Lifecycle Policy",
+  "type": "object",
+  "required": ["states", "transitions"],
+  "properties": {
+    "states": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "transitions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "to", "requires_human_review"],
+        "properties": {
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "requires_human_review": { "type": "boolean" },
+          "review_level": {
+            "type": "string",
+            "enum": ["fast_path", "standard", "architecture"]
+          }
+        }
+      }
+    }
+  }
+}

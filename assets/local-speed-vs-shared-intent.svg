@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">HAIF local speed versus shared intent</title>
+  <desc id="desc">A HAIF chart showing coordination debt rising as AI agent output increases without shared intent maturity.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#172033"/>
+    </marker>
+    <style>
+      .bg { fill: #f7f5ef; }
+      .title { font: 700 32px Arial, sans-serif; fill: #172033; }
+      .subtitle { font: 400 17px Arial, sans-serif; fill: #526071; }
+      .brand { font: 700 15px Arial, sans-serif; fill: #2f5d48; letter-spacing: 0.4px; }
+      .axis { stroke: #172033; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+      .grid { stroke: #ddd8cd; stroke-width: 1.4; }
+      .curve { stroke: #cf6b3b; stroke-width: 8; fill: none; stroke-linecap: round; }
+      .healthy { stroke: #3f8f68; stroke-width: 8; fill: none; stroke-linecap: round; stroke-dasharray: 18 14; }
+      .label { font: 700 20px Arial, sans-serif; fill: #172033; }
+      .small { font: 400 16px Arial, sans-serif; fill: #526071; }
+      .callout { fill: #ffffff; stroke: #d6d1c5; stroke-width: 2; rx: 8; }
+      .warn { fill: #fff3df; stroke: #dfaa52; stroke-width: 2; rx: 8; }
+      .ok { fill: #eef6f2; stroke: #8bb8a2; stroke-width: 2; rx: 8; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1200" height="760"/>
+  <rect x="70" y="34" width="392" height="30" rx="15" fill="#e6f1eb" stroke="#8bb8a2"/>
+  <text class="brand" x="90" y="54">HAIF: Human-Agent Intent Framework</text>
+  <text class="title" x="70" y="96">Local Speed vs Shared Intent</text>
+  <text class="subtitle" x="70" y="127">Agent output scales well only when coordination maturity scales with it.</text>
+
+  <line class="grid" x1="160" y1="580" x2="1030" y2="580"/>
+  <line class="grid" x1="160" y1="455" x2="1030" y2="455"/>
+  <line class="grid" x1="160" y1="330" x2="1030" y2="330"/>
+  <line class="grid" x1="160" y1="205" x2="1030" y2="205"/>
+
+  <path class="axis" d="M160 620 H1050"/>
+  <path class="axis" d="M160 620 V160"/>
+
+  <text class="label" x="405" y="690">Shared intent maturity</text>
+  <text class="label" x="36" y="342" transform="rotate(-90 36 342)">Coordination debt</text>
+
+  <path class="curve" d="M190 585 C320 575, 420 550, 510 485 C610 410, 685 300, 775 235 C855 177, 935 162, 1010 150"/>
+  <path class="healthy" d="M190 590 C330 575, 455 545, 575 505 C705 462, 835 410, 1005 350"/>
+
+  <rect class="warn" x="705" y="245" width="385" height="145" rx="8"/>
+  <text class="label" x="740" y="287">High Output, Low Alignment</text>
+  <text class="small" x="740" y="320">Duplicates, drift, and conflicting</text>
+  <text class="small" x="740" y="346">assumptions create rework and</text>
+  <text class="small" x="740" y="372">loss of trust.</text>
+
+  <rect class="ok" x="430" y="430" width="390" height="130" rx="8"/>
+  <text class="label" x="465" y="472">HAIF Shared Intent Layer</text>
+  <text class="small" x="465" y="505">Review gates, ownership, and</text>
+  <text class="small" x="465" y="531">provenance keep approved context</text>
+  <text class="small" x="465" y="557">visible to teams and agents.</text>
+
+  <rect class="callout" x="205" y="175" width="350" height="120" rx="8"/>
+  <text class="label" x="235" y="216">Core Pattern</text>
+  <text class="small" x="235" y="250">Local agent speed can create</text>
+  <text class="small" x="235" y="276">global coordination cost.</text>
+</svg>

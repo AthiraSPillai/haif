@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
+  <title id="title">HAIF human-agent lifecycle with review gates</title>
+  <desc id="desc">A HAIF lifecycle from signal to release showing where human review and approval should happen.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#2f3a4a"/>
+    </marker>
+    <style>
+      .bg { fill: #f8faf7; }
+      .title { font: 700 32px Arial, sans-serif; fill: #172033; }
+      .subtitle { font: 400 17px Arial, sans-serif; fill: #526071; }
+      .brand { font: 700 15px Arial, sans-serif; fill: #2f5d48; letter-spacing: 0.4px; }
+      .node { fill: #ffffff; stroke: #c9d4ca; stroke-width: 2; rx: 8; }
+      .review { fill: #fff2d8; stroke: #db9e39; stroke-width: 2; rx: 8; }
+      .agent { fill: #eaf4ff; stroke: #78a7d8; stroke-width: 2; rx: 8; }
+      .text { font: 700 17px Arial, sans-serif; fill: #172033; text-anchor: middle; }
+      .small { font: 400 13px Arial, sans-serif; fill: #526071; text-anchor: middle; }
+      .arrow { stroke: #2f3a4a; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+      .gate-text { font: 700 14px Arial, sans-serif; fill: #7a4a00; text-anchor: middle; }
+      .legend { font: 600 15px Arial, sans-serif; fill: #394657; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1200" height="680"/>
+  <rect x="70" y="34" width="392" height="30" rx="15" fill="#e6f1eb" stroke="#8bb8a2"/>
+  <text class="brand" x="90" y="54">HAIF: Human-Agent Intent Framework</text>
+  <text class="title" x="70" y="96">HAIF Human-Agent Work Lifecycle</text>
+  <text class="subtitle" x="70" y="127">Agents can propose and execute, while humans own commitment, scope, and approval.</text>
+
+  <rect class="agent" x="70" y="180" width="125" height="76" rx="8"/>
+  <text class="text" x="132.5" y="213">Signal</text>
+  <text class="small" x="132.5" y="237">observation</text>
+
+  <path class="arrow" d="M205 218 H270"/>
+  <rect class="agent" x="280" y="180" width="125" height="76" rx="8"/>
+  <text class="text" x="342.5" y="213">Proposal</text>
+  <text class="small" x="342.5" y="237">possible work</text>
+
+  <path class="arrow" d="M415 218 H480"/>
+  <rect class="review" x="490" y="160" width="135" height="116" rx="8"/>
+  <text class="gate-text" x="557.5" y="196">Human Review</text>
+  <text class="small" x="557.5" y="222">proposal becomes</text>
+  <text class="small" x="557.5" y="244">accepted intent</text>
+
+  <path class="arrow" d="M635 218 H700"/>
+  <rect class="node" x="710" y="180" width="125" height="76" rx="8"/>
+  <text class="text" x="772.5" y="213">Intent</text>
+  <text class="small" x="772.5" y="237">owned scope</text>
+
+  <path class="arrow" d="M845 218 H910"/>
+  <rect class="node" x="920" y="180" width="125" height="76" rx="8"/>
+  <text class="text" x="982.5" y="213">Design</text>
+  <text class="small" x="982.5" y="237">direction</text>
+
+  <path class="arrow" d="M982.5 266 V330"/>
+  <rect class="review" x="915" y="340" width="135" height="116" rx="8"/>
+  <text class="gate-text" x="982.5" y="376">Human Approval</text>
+  <text class="small" x="982.5" y="402">design becomes</text>
+  <text class="small" x="982.5" y="424">decision</text>
+
+  <path class="arrow" d="M905 398 H840"/>
+  <rect class="node" x="705" y="360" width="125" height="76" rx="8"/>
+  <text class="text" x="767.5" y="393">Decision</text>
+  <text class="small" x="767.5" y="417">approved path</text>
+
+  <path class="arrow" d="M695 398 H630"/>
+  <rect class="node" x="495" y="360" width="125" height="76" rx="8"/>
+  <text class="text" x="557.5" y="393">Task</text>
+  <text class="small" x="557.5" y="417">execution item</text>
+
+  <path class="arrow" d="M485 398 H420"/>
+  <rect class="agent" x="265" y="360" width="145" height="76" rx="8"/>
+  <text class="text" x="337.5" y="393">Implement</text>
+  <text class="small" x="337.5" y="417">agent-assisted</text>
+
+  <path class="arrow" d="M255 398 H200"/>
+  <rect class="review" x="65" y="340" width="125" height="116" rx="8"/>
+  <text class="gate-text" x="127.5" y="376">Drift Check</text>
+  <text class="small" x="127.5" y="402">scope or design</text>
+  <text class="small" x="127.5" y="424">changed?</text>
+
+  <path class="arrow" d="M127.5 330 C150 285, 225 285, 322 340"/>
+  <path class="arrow" d="M127.5 466 C175 535, 265 555, 390 555"/>
+
+  <rect class="node" x="400" y="515" width="125" height="76" rx="8"/>
+  <text class="text" x="462.5" y="548">Review</text>
+  <text class="small" x="462.5" y="572">human check</text>
+
+  <path class="arrow" d="M535 553 H600"/>
+  <rect class="node" x="610" y="515" width="125" height="76" rx="8"/>
+  <text class="text" x="672.5" y="548">Release</text>
+  <text class="small" x="672.5" y="572">final truth</text>
+
+  <rect x="70" y="620" width="22" height="22" fill="#eaf4ff" stroke="#78a7d8"/>
+  <text class="legend" x="104" y="637">Agent-assisted stages</text>
+  <rect x="300" y="620" width="22" height="22" fill="#fff2d8" stroke="#db9e39"/>
+  <text class="legend" x="334" y="637">Human review gates</text>
+  <rect x="535" y="620" width="22" height="22" fill="#ffffff" stroke="#c9d4ca"/>
+  <text class="legend" x="569" y="637">HAIF lifecycle states</text>
+</svg>

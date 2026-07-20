@@ -1,0 +1,22 @@
+recordsDir: .haif/records
+review:
+  fastPath:
+    requiredReviewers: 1
+  standard:
+    requiredReviewers: 2
+  architecture:
+    requiredReviewers: 2
+    requiredRoles:
+      - owner
+      - technical-reviewer
+jira:
+  enabled: false
+  labels:
+    agentCreated: agent-created
+    needsIntent: needs-intent
+    intentLinked: intent-linked
+    designApproved: design-approved
+agents:
+  requirePreflight: true
+  requireSourceRecords: true
+  allowSelfApproval: false
