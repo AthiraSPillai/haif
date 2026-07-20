@@ -84,6 +84,7 @@ Add the rest of the lifecycle after the team has used this for a few real tasks.
 - `packages/cli/`: Node CLI for validation, record creation, preflight, overlap detection, review status, and context export.
 - `packages/python/`: Python SDK and CLI for AI engineering, data, and enterprise automation workflows.
 - `assets/`: diagrams for articles, docs, and presentations.
+- `AGENTS.md`: repo-local instructions for Codex, Claude, and similar agents.
 
 ## Core Record Types
 
