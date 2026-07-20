@@ -94,7 +94,7 @@ function createRecord(args: string[]): number {
     throw new Error(`Record already exists: ${path}`);
   }
 
-  const content = `---\ntype: ${type}\nid: ${id}\ntitle: ${title}\nstatus: ${type === "Intent" ? "accepted" : "proposed"}\nowner: unassigned\ncreated_by: human\ncreated_at: ${now}\nupdated_at: ${now}\nsource: local\nscope: []\nrelated: []\nreviewers: []\nconfidence: draft\n---\n\n# ${title}\n\nDescribe the work, context, and review needs.\n`;
+  const content = `---\ntype: ${type}\nid: ${id}\ntitle: ${title}\ntldr: Summarize what reviewers need to know and what decision is needed.\nstatus: ${type === "Intent" ? "accepted" : "proposed"}\nowner: unassigned\ncreated_by: human\ncreated_at: ${now}\nupdated_at: ${now}\nsource: local\nscope: []\nrelated: []\nreviewers: []\nconfidence: draft\n---\n\n# ${title}\n\nDescribe the work, context, and review needs.\n`;
   writeFileSync(path, content, "utf8");
   console.log(`Created ${path}`);
   return 0;
@@ -172,6 +172,7 @@ function reviewStatus(): number {
   console.log("Pending HAIF review items:");
   for (const record of pending) {
     console.log(`- ${record.data.id}: ${record.data.title} (${record.data.status})`);
+    if (record.data.tldr) console.log(`  ${record.data.tldr}`);
   }
   return 1;
 }
@@ -185,6 +186,7 @@ function exportContext(args: string[]): number {
     console.log(`- id: ${record.data.id}`);
     console.log(`- status: ${record.data.status}`);
     console.log(`- owner: ${record.data.owner}`);
+    if (record.data.tldr) console.log(`- tldr: ${record.data.tldr}`);
     console.log("");
     console.log(record.body.trim());
     console.log("\n---\n");

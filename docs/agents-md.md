@@ -19,6 +19,7 @@ your-repo/
 
 The HAIF `AGENTS.md` instructs agents to:
 
+- write or preserve the `tldr` field so human reviewers can focus quickly
 - read `.haif/records` before significant work
 - run `haif preflight` when available
 - distinguish proposal from committed work

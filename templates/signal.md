@@ -2,6 +2,7 @@
 type: Signal
 id: signal-example
 title: Example signal
+tldr: A short reviewer-focused summary of the observation or issue.
 status: draft
 owner: unassigned
 created_by: human

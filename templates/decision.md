@@ -2,6 +2,7 @@
 type: Decision
 id: decision-example
 title: Example decision
+tldr: A short reviewer-focused summary of the decision and why it matters.
 status: approved
 owner: team-owner
 created_by: human

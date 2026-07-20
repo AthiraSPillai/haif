@@ -2,6 +2,7 @@
 type: Review
 id: review-example
 title: Example review
+tldr: A short reviewer-focused summary of what was reviewed and the outcome.
 status: reviewed
 owner: reviewer
 created_by: human

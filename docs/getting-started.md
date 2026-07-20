@@ -25,6 +25,8 @@ node packages/cli/dist/index.js new proposal "Reduce duplicate agent-created Jir
 
 A proposal is possible work. It is not committed work.
 
+Fill in the `tldr` field first. It should give reviewers the shortest useful summary of the proposal and the decision needed.
+
 ## Validate
 
 ```bash

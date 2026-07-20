@@ -70,6 +70,8 @@ def main(argv=None) -> int:
         print("Pending HAIF review items:")
         for record in pending:
             print("- {}: {} ({})".format(record.data.get("id"), record.data.get("title"), record.data.get("status")))
+            if record.data.get("tldr"):
+                print("  {}".format(record.data.get("tldr")))
         return 1
     if args.command == "export-context":
         print(export_context(load_records(), parse_scope(args.scope)))

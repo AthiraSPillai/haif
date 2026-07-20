@@ -2,6 +2,7 @@
 type: Design
 id: design-example
 title: Example design
+tldr: A short reviewer-focused summary of the design direction and key tradeoff.
 status: proposed
 owner: team-owner
 created_by: human

@@ -2,6 +2,7 @@
 type: Proposal
 id: proposal-example
 title: Example proposal
+tldr: A short reviewer-focused summary of the proposed work and decision needed.
 status: proposed
 owner: unassigned
 created_by: human

@@ -18,6 +18,11 @@
       "type": "string",
       "minLength": 3
     },
+    "tldr": {
+      "type": "string",
+      "minLength": 10,
+      "description": "One or two sentence summary for human reviewers."
+    },
     "status": {
       "type": "string",
       "enum": ["draft", "proposed", "accepted", "reviewed", "approved", "in_progress", "blocked", "superseded", "rejected", "released"]

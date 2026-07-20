@@ -47,6 +47,7 @@ Agents must not:
 
 For significant work, link output back to HAIF records:
 
+- every HAIF record includes a reviewer-focused `tldr`
 - plans link to `Intent`
 - implementation links to `Decision` or reviewed `Design`
 - PRs link to `Task` and `Intent`

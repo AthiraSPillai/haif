@@ -2,6 +2,7 @@
 type: Conflict
 id: conflict-example
 title: Example conflict
+tldr: A short reviewer-focused summary of the conflict and resolution needed.
 status: blocked
 owner: team-owner
 created_by: human

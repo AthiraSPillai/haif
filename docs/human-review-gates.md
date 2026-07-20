@@ -2,6 +2,8 @@
 
 HAIF makes human review explicit at state transitions.
 
+Every record should include a `tldr` field so reviewers can quickly understand what changed, why it matters, and what decision is needed before reading the full record.
+
 ## Required Gates
 
 - `Proposal -> Intent`: confirms real work, owner, and priority.

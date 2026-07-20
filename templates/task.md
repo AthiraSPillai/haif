@@ -2,6 +2,7 @@
 type: Task
 id: task-example
 title: Example task
+tldr: A short reviewer-focused summary of the execution task and linked intent.
 status: in_progress
 owner: team-owner
 created_by: human

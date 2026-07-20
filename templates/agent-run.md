@@ -2,6 +2,7 @@
 type: AgentRun
 id: agent-run-example
 title: Example agent run
+tldr: A short reviewer-focused summary of what the agent generated or changed.
 status: draft
 owner: human-owner
 created_by: agent

@@ -44,6 +44,7 @@ def create_record(record_type: str, title: str, root: Optional[Path] = None) -> 
         "type: {type}\n"
         "id: {id}\n"
         "title: {title}\n"
+        "tldr: Summarize what reviewers need to know and what decision is needed.\n"
         "status: {status}\n"
         "owner: unassigned\n"
         "created_by: human\n"
@@ -159,6 +160,8 @@ def export_context(records: Sequence[HaifRecord], scope: Sequence[str] = ()) -> 
         sections.append("- id: {}".format(record.data.get("id")))
         sections.append("- status: {}".format(record.data.get("status")))
         sections.append("- owner: {}".format(record.data.get("owner")))
+        if record.data.get("tldr"):
+            sections.append("- tldr: {}".format(record.data.get("tldr")))
         sections.append("")
         sections.append(record.body.strip())
         sections.append("\n---\n")

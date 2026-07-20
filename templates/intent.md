@@ -2,6 +2,7 @@
 type: Intent
 id: intent-example
 title: Example intent
+tldr: A short reviewer-focused summary of the accepted problem, owner, and scope.
 status: accepted
 owner: team-owner
 created_by: human
