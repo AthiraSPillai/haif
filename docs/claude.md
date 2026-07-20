@@ -13,3 +13,14 @@ Use HAIF records as trusted context before Claude or Claude Code creates plans, 
 ## Expected Behavior
 
 Claude can summarize and compare options, but humans approve commitment, scope, and design direction.
+
+## Claude Skills And HAIF
+
+Claude commands, prompts, or reusable workflows should use HAIF records as their coordination state:
+
+- read `.haif/records` before planning
+- create `Proposal` or `AgentRun` records for significant generated work
+- require accepted `Intent` and reviewed `Design` before implementation
+- stop when unresolved conflicts or missing owners appear
+
+The workflow can be automated, but approval remains human-owned.

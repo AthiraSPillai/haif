@@ -90,6 +90,8 @@ Add the rest of the lifecycle after the team has used this for a few real tasks.
 
 Every HAIF record should include a `tldr` field: one or two sentences that tell a human reviewer what changed, why it matters, and what decision or attention is needed.
 
+See [docs/tldr.md](docs/tldr.md) for TLDR guidance.
+
 - `Signal`: raw observation or issue.
 - `Proposal`: suggested work, not yet accepted.
 - `Intent`: accepted problem or opportunity with owner and scope.
