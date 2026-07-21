@@ -54,8 +54,6 @@ Before significant planning, ticket creation, docs, or code changes:
 Agents may propose work, but humans approve intent, design, decisions, and release readiness.
 ```
 
-Do not ask agents to clone or install HAIF automatically inside every repo. Install or clone HAIF intentionally, then point your repo instructions to it. Agents should use HAIF when it is available and report when setup is missing.
-
 The day-to-day flow is:
 
 ```text
