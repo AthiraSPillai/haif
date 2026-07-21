@@ -26,6 +26,55 @@ Signal -> Proposal -> Intent -> Design -> Decision -> Task -> Implementation -> 
 
 Agents can observe, summarize, propose, compare, draft, and implement from approved context. Humans own commitment, scope, ownership, design approval, cross-workstream alignment, and release readiness.
 
+## If You Already Use Codex And AGENTS.md
+
+HAIF does not replace your existing agent instructions. It adds shared coordination state for those agents to read before they act.
+
+```text
+your-repo/
+  AGENTS.md          <- tells Codex or other agents how to behave
+  .haif/records/    <- tells agents what the team has agreed on
+```
+
+Add a HAIF section to your existing `AGENTS.md`:
+
+```markdown
+## HAIF Workflow
+
+This repo uses HAIF: Human-Agent Intent Framework.
+
+Before significant planning, ticket creation, docs, or code changes:
+
+1. Read `.haif/records`.
+2. Run `haif preflight` if available.
+3. Continue only if there is accepted intent and no unresolved conflict.
+4. If intent is missing, create a HAIF `Proposal` instead of starting implementation.
+5. If implementation changes scope, APIs, data models, security, or architecture, stop and request human review.
+
+Agents may propose work, but humans approve intent, design, decisions, and release readiness.
+```
+
+The day-to-day flow is:
+
+```text
+Human or agent sees work
+        |
+        v
+Agent reads AGENTS.md
+        |
+        v
+Agent checks .haif/records
+        |
+        v
+Agent runs haif preflight
+        |
+        +--> aligned: plan, code, document, or create tickets
+        |
+        +--> not aligned: create Proposal and ask for human review
+```
+
+In short: keep `AGENTS.md`, add HAIF rules to it, create `.haif/records`, and ask agents to check HAIF before meaningful work.
+
 ## Quick Start
 
 ```bash
