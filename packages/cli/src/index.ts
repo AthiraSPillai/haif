@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
-import { pathToFileURL } from "node:url";
 
 type RecordType =
   | "Signal"
@@ -320,6 +319,4 @@ Usage:
   haif export-context [--scope=a,b]`);
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  process.exitCode = main(process.argv.slice(2));
-}
+process.exitCode = main(process.argv.slice(2));
