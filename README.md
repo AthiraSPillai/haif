@@ -54,6 +54,8 @@ Before significant planning, ticket creation, docs, or code changes:
 Agents may propose work, but humans approve intent, design, decisions, and release readiness.
 ```
 
+Do not ask agents to clone or install HAIF automatically inside every repo. Install or clone HAIF intentionally, then point your repo instructions to it. Agents should use HAIF when it is available and report when setup is missing.
+
 The day-to-day flow is:
 
 ```text
@@ -75,11 +77,18 @@ Agent runs haif preflight
 
 In short: keep `AGENTS.md`, add HAIF rules to it, create `.haif/records`, and ask agents to check HAIF before meaningful work.
 
-## Quick Start
+## Quick Start: Try HAIF By Cloning This Repo
 
 ```bash
+git clone https://github.com/AthiraSPillai/haif.git
+cd haif
 npm install
 npm run build
+```
+
+Initialize HAIF records in the cloned repo:
+
+```bash
 node packages/cli/dist/index.js init
 node packages/cli/dist/index.js new proposal "Reduce duplicate agent-created Jira tickets"
 node packages/cli/dist/index.js validate
@@ -91,6 +100,78 @@ For local development without publishing the CLI package:
 ```bash
 npm run haif -- validate
 ```
+
+## Use HAIF In Your Existing Project
+
+Use this when you already have a project with Codex, Claude, Cursor, Copilot-style agents, or repo instruction files.
+
+1. Clone HAIF somewhere on your machine:
+
+   ```bash
+   git clone https://github.com/AthiraSPillai/haif.git
+   cd haif
+   npm install
+   npm run build
+   ```
+
+2. Go to your own project:
+
+   ```bash
+   cd path/to/your-project
+   ```
+
+3. Initialize HAIF records in your project:
+
+   ```bash
+   node path/to/haif/packages/cli/dist/index.js init
+   ```
+
+4. Add a proposal before significant agent-assisted work:
+
+   ```bash
+   node path/to/haif/packages/cli/dist/index.js new proposal "Refactor onboarding flow"
+   ```
+
+5. Validate records:
+
+   ```bash
+   node path/to/haif/packages/cli/dist/index.js validate
+   ```
+
+6. Run preflight before agents create tickets, docs, designs, or code:
+
+   ```bash
+   node path/to/haif/packages/cli/dist/index.js preflight --scope onboarding
+   ```
+
+7. Add HAIF guidance to your existing repo instruction file, such as `AGENTS.md` or `CLAUDE.md`.
+
+   Use the example in [docs/agents-md.md](docs/agents-md.md).
+
+## Use HAIF With Python
+
+1. Clone HAIF:
+
+   ```bash
+   git clone https://github.com/AthiraSPillai/haif.git
+   cd haif
+   ```
+
+2. Run the Python CLI from the HAIF repo:
+
+   ```bash
+   set PYTHONPATH=packages/python/src
+   python -m haif.cli init
+   python -m haif.cli new proposal "Reduce duplicate agent-created tickets"
+   python -m haif.cli validate
+   python -m haif.cli preflight --scope jira,docs
+   ```
+
+   On macOS or Linux:
+
+   ```bash
+   PYTHONPATH=packages/python/src python -m haif.cli validate
+   ```
 
 ## Team Pilot Workflow
 
