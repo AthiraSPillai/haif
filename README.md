@@ -26,17 +26,17 @@ Signal -> Proposal -> Intent -> Design -> Decision -> Task -> Implementation -> 
 
 Agents can observe, summarize, propose, compare, draft, and implement from approved context. Humans own commitment, scope, ownership, design approval, cross-workstream alignment, and release readiness.
 
-## If You Already Use Codex And AGENTS.md
+## If You Already Use AI Agents And Repo Instructions
 
-HAIF does not replace your existing agent instructions. It adds shared coordination state for those agents to read before they act.
+HAIF does not replace your existing agent instructions. It adds shared coordination state for Codex, Claude, Cursor, Copilot-style agents, and other AI agents to read before they act.
 
 ```text
 your-repo/
-  AGENTS.md          <- tells Codex or other agents how to behave
+  AGENTS.md          <- tells agents how to behave
   .haif/records/    <- tells agents what the team has agreed on
 ```
 
-Add a HAIF section to your existing `AGENTS.md`:
+Add a HAIF section to your existing repo instruction file, such as `AGENTS.md`, `CLAUDE.md`, or another tool-specific instruction file:
 
 ```markdown
 ## HAIF Workflow
