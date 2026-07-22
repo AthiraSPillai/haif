@@ -15,7 +15,21 @@ npm run build
 node packages/cli/dist/index.js init
 ```
 
-This creates `.haif/records` and copies starter templates if the directory does not already exist.
+This creates `.haif/records` with stage-specific folders and creates or updates `AGENTS.md` with HAIF workflow guidance.
+
+```text
+.haif/
+  records/
+    signals/
+    proposals/
+    intents/
+    designs/
+    decisions/
+    tasks/
+    reviews/
+    conflicts/
+    agent-runs/
+```
 
 ## Create A Proposal
 
@@ -24,6 +38,8 @@ node packages/cli/dist/index.js new proposal "Reduce duplicate agent-created Jir
 ```
 
 A proposal is possible work. It is not committed work.
+
+New records are stored by stage. For example, proposals go in `.haif/records/proposals/` and intents go in `.haif/records/intents/`.
 
 Fill in the `tldr` field first. It should give reviewers the shortest useful summary of the proposal and the decision needed.
 

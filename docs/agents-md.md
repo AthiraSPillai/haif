@@ -18,11 +18,16 @@ In this model, `AGENTS.md` is the instruction layer, HAIF records are the coordi
 
 Copy the root `AGENTS.md` into any repo or workspace where the team wants to use HAIF.
 
+You can also run `haif init`. It creates `AGENTS.md` if missing, or appends a marked HAIF workflow section if `AGENTS.md` already exists.
+
 ```text
 your-repo/
   AGENTS.md
   .haif/
     records/
+      proposals/
+      intents/
+      decisions/
 ```
 
 ## What It Does

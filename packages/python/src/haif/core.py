@@ -10,6 +10,33 @@ from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 REQUIRED_FIELDS = ["type", "id", "title", "status", "owner", "created_by", "created_at", "updated_at"]
 ALLOWED_TYPES = {"Signal", "Proposal", "Intent", "Design", "Decision", "Task", "Review", "Conflict", "AgentRun"}
 APPROVED_STATUSES = {"accepted", "reviewed", "approved", "released"}
+RECORD_FOLDERS = {
+    "Signal": "signals",
+    "Proposal": "proposals",
+    "Intent": "intents",
+    "Design": "designs",
+    "Decision": "decisions",
+    "Task": "tasks",
+    "Review": "reviews",
+    "Conflict": "conflicts",
+    "AgentRun": "agent-runs",
+}
+HAIF_AGENT_SECTION_MARKER = "<!-- HAIF_AGENT_WORKFLOW -->"
+HAIF_AGENT_SECTION = """{marker}
+## HAIF Workflow
+
+This repo uses HAIF: Human-Agent Intent Framework.
+
+Before significant planning, ticket creation, docs, or code changes:
+
+1. Read relevant records in `.haif/records`.
+2. Run `haif preflight` if available.
+3. Continue only if there is accepted intent and no unresolved conflict.
+4. If intent is missing, create a HAIF `Proposal` instead of starting implementation.
+5. If implementation changes scope, APIs, data models, security, or architecture, stop and request human review.
+
+Agents may propose work, but humans approve intent, design, decisions, and release readiness.
+""".format(marker=HAIF_AGENT_SECTION_MARKER)
 
 
 @dataclass
@@ -26,14 +53,31 @@ def records_dir(root: Optional[Path] = None) -> Path:
 def init_records(root: Optional[Path] = None) -> Path:
     directory = records_dir(root)
     directory.mkdir(parents=True, exist_ok=True)
+    for folder in RECORD_FOLDERS.values():
+        (directory / folder).mkdir(parents=True, exist_ok=True)
+    ensure_agents_md(root)
     return directory
+
+
+def ensure_agents_md(root: Optional[Path] = None) -> Path:
+    base = root or Path.cwd()
+    path = base / "AGENTS.md"
+    if not path.exists():
+        path.write_text("# Agent Instructions\n\n{}".format(HAIF_AGENT_SECTION), encoding="utf-8")
+        return path
+    existing = path.read_text(encoding="utf-8")
+    if HAIF_AGENT_SECTION_MARKER not in existing:
+        path.write_text("{}\n\n{}".format(existing.rstrip(), HAIF_AGENT_SECTION), encoding="utf-8")
+    return path
 
 
 def create_record(record_type: str, title: str, root: Optional[Path] = None) -> Path:
     normalized = normalize_type(record_type)
     now = datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
     record_id = "{}-{}".format(record_type.lower(), slug(title))
-    directory = init_records(root)
+    init_records(root)
+    directory = records_dir(root) / RECORD_FOLDERS[normalized]
+    directory.mkdir(parents=True, exist_ok=True)
     path = directory / "{}.md".format(record_id)
     if path.exists():
         raise ValueError("Record already exists: {}".format(path))
@@ -67,7 +111,7 @@ def load_records(root: Optional[Path] = None) -> List[HaifRecord]:
     directory = records_dir(root)
     if not directory.exists():
         return []
-    return [parse_record(path) for path in sorted(directory.glob("*.md"))]
+    return [parse_record(path) for path in sorted(directory.rglob("*.md"))]
 
 
 def parse_record(path: Path) -> HaifRecord:

@@ -32,6 +32,33 @@ const allowedTypes = new Set<RecordType>([
   "AgentRun",
 ]);
 const approvedStatuses = new Set(["accepted", "reviewed", "approved", "released"]);
+const recordFolders: Record<RecordType, string> = {
+  Signal: "signals",
+  Proposal: "proposals",
+  Intent: "intents",
+  Design: "designs",
+  Decision: "decisions",
+  Task: "tasks",
+  Review: "reviews",
+  Conflict: "conflicts",
+  AgentRun: "agent-runs",
+};
+const haifAgentSectionMarker = "<!-- HAIF_AGENT_WORKFLOW -->";
+const haifAgentSection = `${haifAgentSectionMarker}
+## HAIF Workflow
+
+This repo uses HAIF: Human-Agent Intent Framework.
+
+Before significant planning, ticket creation, docs, or code changes:
+
+1. Read relevant records in \`.haif/records\`.
+2. Run \`haif preflight\` if available.
+3. Continue only if there is accepted intent and no unresolved conflict.
+4. If intent is missing, create a HAIF \`Proposal\` instead of starting implementation.
+5. If implementation changes scope, APIs, data models, security, or architecture, stop and request human review.
+
+Agents may propose work, but humans approve intent, design, decisions, and release readiness.
+`;
 
 export function main(args: string[]): number {
   const [command, ...rest] = args;
@@ -73,6 +100,20 @@ function recordsDir(): string {
 
 function init(): number {
   mkdirSync(recordsDir(), { recursive: true });
+  for (const folder of Object.values(recordFolders)) {
+    mkdirSync(join(recordsDir(), folder), { recursive: true });
+  }
+  const agentPath = resolve(process.cwd(), "AGENTS.md");
+  if (!existsSync(agentPath)) {
+    writeFileSync(agentPath, `# Agent Instructions\n\n${haifAgentSection}`, "utf8");
+    console.log(`Created ${agentPath}`);
+  } else {
+    const existing = readFileSync(agentPath, "utf8");
+    if (!existing.includes(haifAgentSectionMarker)) {
+      writeFileSync(agentPath, `${existing.trimEnd()}\n\n${haifAgentSection}`, "utf8");
+      console.log(`Updated ${agentPath}`);
+    }
+  }
   console.log(`Initialized HAIF records at ${recordsDir()}`);
   return 0;
 }
@@ -87,8 +128,9 @@ function createRecord(args: string[]): number {
   const title = titleParts.join(" ");
   const now = new Date().toISOString();
   const id = `${rawType.toLowerCase()}-${slug(title)}`;
-  mkdirSync(recordsDir(), { recursive: true });
-  const path = join(recordsDir(), `${id}.md`);
+  const directory = join(recordsDir(), recordFolders[type]);
+  mkdirSync(directory, { recursive: true });
+  const path = join(directory, `${id}.md`);
   if (existsSync(path)) {
     throw new Error(`Record already exists: ${path}`);
   }
@@ -196,9 +238,21 @@ function exportContext(args: string[]): number {
 function loadRecords(): HaifRecord[] {
   const dir = recordsDir();
   if (!existsSync(dir)) return [];
-  return readdirSync(dir)
-    .filter((file) => file.endsWith(".md"))
-    .map((file) => parseRecord(join(dir, file)));
+  return findMarkdownFiles(dir).map((file) => parseRecord(file));
+}
+
+function findMarkdownFiles(dir: string): string[] {
+  const entries = readdirSync(dir, { withFileTypes: true });
+  const files: string[] = [];
+  for (const entry of entries) {
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...findMarkdownFiles(path));
+    } else if (entry.isFile() && entry.name.endsWith(".md")) {
+      files.push(path);
+    }
+  }
+  return files.sort();
 }
 
 function parseRecord(path: string): HaifRecord {

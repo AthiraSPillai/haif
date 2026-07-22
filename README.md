@@ -75,6 +75,8 @@ Agent runs haif preflight
 
 In short: keep `AGENTS.md`, add HAIF rules to it, create `.haif/records`, and ask agents to check HAIF before meaningful work.
 
+`haif init` creates or updates `AGENTS.md` automatically. If an `AGENTS.md` file already exists, HAIF appends a marked HAIF workflow section instead of replacing your current instructions.
+
 ## Quick Start: Try HAIF By Cloning This Repo
 
 Works on macOS, Linux, and Windows with Node 20+.
@@ -249,6 +251,30 @@ For a small pilot, start with only three record types:
 - `Decision`: reviewed direction that agents and humans can treat as current.
 
 Add the rest of the lifecycle after the team has used this for a few real tasks.
+
+## Record Folders
+
+HAIF keeps records in stage-specific folders so teams do not end up with one large intent file or one crowded records directory.
+
+```text
+.haif/
+  records/
+    signals/
+    proposals/
+    intents/
+    designs/
+    decisions/
+    tasks/
+    reviews/
+    conflicts/
+    agent-runs/
+```
+
+`haif new proposal "Title"` creates a file under `.haif/records/proposals/`.
+
+`haif new intent "Title"` creates a file under `.haif/records/intents/`.
+
+Validation, preflight, overlap detection, review status, and context export read records recursively, so older flat `.haif/records/*.md` files still work.
 
 ## Repo Contents
 
