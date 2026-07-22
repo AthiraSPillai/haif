@@ -6,11 +6,9 @@ Every record should include a `tldr` field so reviewers can quickly understand w
 
 ## Required Gates
 
-- `Proposal -> Intent`: confirms real work, owner, and priority.
-- `Intent -> Design`: confirms scope and affected systems.
+- `Proposal -> Design`: confirms the work is worth designing.
 - `Design -> Decision`: confirms architecture, tradeoffs, risk, and review.
-- `Decision -> Task`: confirms execution work matches approved direction.
-- `Implementation -> Review`: confirms delivered work matches intent and decision.
+- `Decision -> implementation`: confirms execution should begin in Jira, GitHub, docs, or other existing tools.
 - Major scope or design drift: returns work to design review.
 
 ## Review Levels

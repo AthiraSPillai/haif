@@ -67,11 +67,12 @@ Before significant planning, ticket creation, docs, or code changes:
 
 1. Read relevant records in \`.haif/records\`.
 2. Run \`haif preflight\` if available.
-3. Continue only if there is accepted intent and no unresolved conflict.
-4. If intent is missing, create a HAIF \`Proposal\` instead of starting implementation.
-5. If implementation changes scope, APIs, data models, security, or architecture, stop and request human review.
+3. Continue to implementation only if there is an approved HAIF \`Decision\` and no unresolved conflict.
+4. If alignment is missing, create a HAIF \`Proposal\` instead of starting implementation.
+5. If solution details are unclear, create or update a HAIF \`Design\`.
+6. If implementation changes scope, APIs, data models, security, or architecture, stop and request human review.
 
-Agents may propose work, but humans approve intent, design, decisions, and release readiness.
+Agents may create proposals and draft designs, but humans approve decisions before implementation.
 `;
 
 export function main(args: string[]): number {
@@ -146,21 +147,26 @@ function init(): number {
 function createRecord(args: string[]): number {
   const [rawType, ...titleParts] = args;
   if (!rawType || titleParts.length === 0) {
-    throw new Error("Usage: haif new <proposal|intent|design|decision|task|review|conflict|agent-run|signal> <title>");
+    throw new Error("Usage: haif new <proposal|design|decision|conflict|...> <title> [--app=name] [--related=a,b]");
   }
 
   const type = normalizeType(rawType);
-  const title = titleParts.join(" ");
+  const title = titleParts.filter((part) => !part.startsWith("--")).join(" ");
+  if (!title) throw new Error("Record title is required");
   const now = new Date().toISOString();
   const id = `${rawType.toLowerCase()}-${slug(title)}`;
-  const directory = join(recordsDir(), recordFolders[type]);
+  const app = optionValue(titleParts, "app");
+  const related = optionValue(titleParts, "related");
+  const directory = app ? join(recordsDir(), recordFolders[type], slug(app)) : join(recordsDir(), recordFolders[type]);
   mkdirSync(directory, { recursive: true });
   const path = join(directory, `${id}.md`);
   if (existsSync(path)) {
     throw new Error(`Record already exists: ${path}`);
   }
 
-  const content = `---\ntype: ${type}\nid: ${id}\ntitle: ${title}\ntldr: Summarize what reviewers need to know and what decision is needed.\nstatus: ${type === "Intent" ? "accepted" : "proposed"}\nowner: unassigned\ncreated_by: human\ncreated_at: ${now}\nupdated_at: ${now}\nsource: local\nscope: []\nrelated: []\nreviewers: []\nconfidence: draft\n---\n\n# ${title}\n\nDescribe the work, context, and review needs.\n`;
+  const scopeValue = app ? `[${slug(app)}]` : "[]";
+  const relatedValue = related ? `[${related.split(",").map((value) => value.trim()).filter(Boolean).join(", ")}]` : "[]";
+  const content = `---\ntype: ${type}\nid: ${id}\ntitle: ${title}\ntldr: Summarize what reviewers need to know and what decision is needed.\nstatus: ${type === "Intent" ? "accepted" : "proposed"}\nowner: unassigned\ncreated_by: human\ncreated_at: ${now}\nupdated_at: ${now}\nsource: local\nscope: ${scopeValue}\nrelated: ${relatedValue}\nreviewers: []\nconfidence: draft\n---\n\n# ${title}\n\nDescribe the work, context, and review needs.\n`;
   writeFileSync(path, content, "utf8");
   console.log(`Created ${path}`);
   return 0;
@@ -190,11 +196,9 @@ function preflight(args: string[]): number {
   const records = filterByScope(loadRecords(), scope);
   const resolvedConflicts = resolvedConflictIds();
   const issues: string[] = [];
-  const acceptedIntent = records.some((record) => record.data.type === "Intent" && approvedStatuses.has(String(record.data.status)));
   const approvedDecision = records.some((record) => record.data.type === "Decision" && String(record.data.status) === "approved");
   const unresolvedConflict = records.some((record) => record.data.type === "Conflict" && !resolvedConflicts.has(String(record.data.id)) && !["rejected", "superseded", "released"].includes(String(record.data.status)));
 
-  if (!acceptedIntent) issues.push("No accepted intent found for this scope.");
   if (!approvedDecision) issues.push("No approved decision found for this scope.");
   if (unresolvedConflict) issues.push("Unresolved conflict found for this scope.");
 
@@ -508,7 +512,7 @@ function printHelp(): void {
 Usage:
   haif init
   haif validate
-  haif new <type> <title>
+  haif new <type> <title> [--app=name] [--related=a,b]
   haif preflight [--scope=a,b]
   haif detect-overlap
   haif review-status

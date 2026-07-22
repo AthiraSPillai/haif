@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
+  <title id="title">HAIF v1 flow</title>
+  <desc id="desc">A diagram showing the simplified HAIF v1 flow from proposal to design to decision, then implementation in existing tools.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#263244"/>
+    </marker>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#162033" flood-opacity="0.14"/>
+    </filter>
+    <style>
+      .bg { fill: #f7f5ef; }
+      .brand { font: 700 15px Arial, sans-serif; fill: #2f5d48; letter-spacing: 0.4px; }
+      .title { font: 700 34px Arial, sans-serif; fill: #172033; }
+      .subtitle { font: 400 18px Arial, sans-serif; fill: #526071; }
+      .box { fill: #ffffff; stroke: #d6d1c5; stroke-width: 2; rx: 8; filter: url(#shadow); }
+      .core { fill: #eef6f2; stroke: #81aa96; stroke-width: 2.4; rx: 8; filter: url(#shadow); }
+      .decision { fill: #fff3df; stroke: #dba44a; stroke-width: 2.4; rx: 8; filter: url(#shadow); }
+      .tools { fill: #eef4ff; stroke: #80a8d8; stroke-width: 2.4; rx: 8; filter: url(#shadow); }
+      .extension { fill: #ffffff; stroke: #c9c2b5; stroke-width: 1.7; rx: 8; }
+      .label { font: 700 23px Arial, sans-serif; fill: #172033; text-anchor: middle; }
+      .small { font: 400 16px Arial, sans-serif; fill: #526071; text-anchor: middle; }
+      .tiny { font: 600 14px Arial, sans-serif; fill: #526071; text-anchor: middle; }
+      .arrow { stroke: #263244; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+      .dashed { stroke: #526071; stroke-width: 2.4; fill: none; stroke-dasharray: 8 8; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1200" height="680"/>
+  <rect x="70" y="34" width="350" height="30" rx="15" fill="#e6f1eb" stroke="#8bb8a2"/>
+  <text class="brand" x="90" y="54">HAIF: Human-Agent Intent Framework</text>
+  <text class="title" x="70" y="96">HAIF v1 Flow</text>
+  <text class="subtitle" x="70" y="127">Keep coordination simple: proposal, design, decision, then implementation in existing tools.</text>
+
+  <rect class="core" x="80" y="230" width="230" height="145" rx="8"/>
+  <text class="label" x="195" y="278">Proposal</text>
+  <text class="small" x="195" y="314">Should we do this?</text>
+  <text class="tiny" x="195" y="344">Possible work</text>
+
+  <path class="arrow" d="M320 302 H425"/>
+
+  <rect class="core" x="435" y="230" width="230" height="145" rx="8"/>
+  <text class="label" x="550" y="278">Design</text>
+  <text class="small" x="550" y="314">How should we do this?</text>
+  <text class="tiny" x="550" y="344">Approach and tradeoffs</text>
+
+  <path class="arrow" d="M675 302 H780"/>
+
+  <rect class="decision" x="790" y="230" width="230" height="145" rx="8"/>
+  <text class="label" x="905" y="278">Decision</text>
+  <text class="small" x="905" y="314">What was approved?</text>
+  <text class="tiny" x="905" y="344">Human-reviewed direction</text>
+
+  <path class="arrow" d="M905 385 V455"/>
+
+  <rect class="tools" x="710" y="465" width="390" height="115" rx="8"/>
+  <text class="label" x="905" y="508">Actual Implementation</text>
+  <text class="small" x="905" y="542">Code | PRs | Jira | Docs | Tests | Releases</text>
+
+  <path class="dashed" d="M198 386 C220 465, 325 520, 500 520"/>
+  <rect class="box" x="345" y="465" width="270" height="115" rx="8"/>
+  <text class="label" x="480" y="506">Optional Extensions</text>
+  <text class="small" x="480" y="536">Conflict | AgentRun</text>
+  <text class="small" x="480" y="560">Task | Review | Signal</text>
+
+  <text class="tiny" x="550" y="420">Agents may draft proposals and designs.</text>
+  <text class="tiny" x="550" y="445">Humans approve decisions before implementation.</text>
+</svg>

@@ -22,7 +22,6 @@ This creates `.haif/records` with stage-specific folders and creates or updates 
   records/
     signals/
     proposals/
-    intents/
     designs/
     decisions/
     tasks/
@@ -39,7 +38,13 @@ node packages/cli/dist/index.js new proposal "Reduce duplicate agent-created Jir
 
 A proposal is possible work. It is not committed work.
 
-New records are stored by stage. For example, proposals go in `.haif/records/proposals/` and intents go in `.haif/records/intents/`.
+New records are stored by stage. For example, proposals go in `.haif/records/proposals/`, designs go in `.haif/records/designs/`, and decisions go in `.haif/records/decisions/`.
+
+Use `--app` to organize records by application, service, or workstream:
+
+```bash
+node packages/cli/dist/index.js new proposal "Reduce duplicate agent-created Jira tickets" --app=planning
+```
 
 Fill in the `tldr` field first. It should give reviewers the shortest useful summary of the proposal and the decision needed.
 
@@ -57,4 +62,4 @@ Validation checks required metadata, owner fields, review state, conflict record
 node packages/cli/dist/index.js preflight --scope jira,docs
 ```
 
-Preflight tells an agent or human whether the current context is ready for planning, ticket creation, documentation, or implementation.
+Preflight tells an agent or human whether the current context has an approved decision and no unresolved conflict before implementation.

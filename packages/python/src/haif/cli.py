@@ -19,6 +19,8 @@ def main(argv=None) -> int:
     new_parser = subparsers.add_parser("new")
     new_parser.add_argument("type")
     new_parser.add_argument("title", nargs="+")
+    new_parser.add_argument("--app", default="")
+    new_parser.add_argument("--related", default="")
 
     preflight_parser = subparsers.add_parser("preflight")
     preflight_parser.add_argument("--scope", default="")
@@ -39,7 +41,7 @@ def main(argv=None) -> int:
         print("Initialized HAIF records at {}".format(directory))
         return 0
     if args.command == "new":
-        path = create_record(args.type, " ".join(args.title))
+        path = create_record(args.type, " ".join(args.title), app=args.app, related=parse_scope(args.related))
         print("Created {}".format(path))
         return 0
     if args.command == "validate":

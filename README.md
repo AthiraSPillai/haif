@@ -21,10 +21,12 @@ None of them reliably owns shared human-agent intent.
 HAIF adds that missing layer:
 
 ```text
-Signal -> Proposal -> Intent -> Design -> Decision -> Task -> Implementation -> Review -> Release
+Proposal -> Design -> Decision -> actual implementation
 ```
 
-Agents can observe, summarize, propose, compare, draft, and implement from approved context. Humans own commitment, scope, ownership, design approval, cross-workstream alignment, and release readiness.
+![HAIF v1 flow](assets/haif-v1-flow.svg)
+
+Agents can create proposals and draft designs. Humans approve decisions. Actual implementation stays in existing tools such as Jira, GitHub, docs, tests, and release systems.
 
 ## If You Already Use AI Agents And Repo Instructions
 
@@ -47,11 +49,12 @@ Before significant planning, ticket creation, docs, or code changes:
 
 1. Read `.haif/records`.
 2. Run `haif preflight` if available.
-3. Continue only if there is accepted intent and no unresolved conflict.
-4. If intent is missing, create a HAIF `Proposal` instead of starting implementation.
-5. If implementation changes scope, APIs, data models, security, or architecture, stop and request human review.
+3. Continue to implementation only if there is an approved HAIF `Decision` and no unresolved conflict.
+4. If alignment is missing, create a HAIF `Proposal` instead of starting implementation.
+5. If solution details are unclear, create or update a HAIF `Design`.
+6. If implementation changes scope, APIs, data models, security, or architecture, stop and request human review.
 
-Agents may propose work, but humans approve intent, design, decisions, and release readiness.
+Agents may create proposals and draft designs, but humans approve decisions before implementation.
 ```
 
 The day-to-day flow is:
@@ -73,7 +76,7 @@ Agent runs haif preflight
         +--> not aligned: create Proposal and ask for human review
 ```
 
-In short: keep `AGENTS.md`, add HAIF rules to it, create `.haif/records`, and ask agents to check HAIF before meaningful work.
+In short: keep `AGENTS.md`, add HAIF rules to it, create `.haif/records`, and ask agents to check for an approved decision before meaningful implementation work.
 
 `haif init` creates or updates `AGENTS.md` automatically. If an `AGENTS.md` file already exists, HAIF appends a marked HAIF workflow section instead of replacing your current instructions.
 
@@ -231,26 +234,29 @@ Idea or agent suggestion
 HAIF Proposal
         |
         v human review
-HAIF Intent
+HAIF Design
+        |
+        v human approval
+HAIF Decision
         |
         v
-Jira ticket / design / implementation
+Jira ticket / code / docs / tests
         |
         v
-PR or final output links back to HAIF Intent
+PR or final output links back to HAIF Decision
 ```
 
 Recommended first team rule:
 
-> Agents can propose work, summarize context, and draft implementation plans, but committed Jira tickets and design direction should link to a human-reviewed HAIF intent.
+> Agents can propose work, summarize context, and draft designs, but committed Jira tickets and implementation should link to a human-approved HAIF decision.
 
 For a small pilot, start with only three record types:
 
 - `Proposal`: possible work from a human or agent.
-- `Intent`: accepted work with owner, scope, affected systems, and related context.
+- `Design`: proposed approach, options, tradeoffs, and risks.
 - `Decision`: reviewed direction that agents and humans can treat as current.
 
-Add the rest of the lifecycle after the team has used this for a few real tasks.
+Add optional extension records after the team has used this for a few real tasks.
 
 ## Tutorial: Updating An API With HAIF
 
@@ -275,10 +281,8 @@ AGENTS.md
 .haif/
   records/
     proposals/
-    intents/
     designs/
     decisions/
-    tasks/
     conflicts/
     agent-runs/
 ```
@@ -306,42 +310,15 @@ related: [jira://PLAT-142]
 
 The proposal is not committed work yet. It is a reviewable suggestion.
 
-### 3. Promote Accepted Work To Intent
+### 3. Draft The Design
 
-After human review, create an intent:
-
-```bash
-haif new intent "Add account status API"
-```
-
-Edit the generated file under `.haif/records/intents/`:
-
-```yaml
-type: Intent
-id: intent-add-account-status-api
-title: Add account status API
-tldr: Accepted work to create one owned account-status contract for onboarding, billing, and support.
-status: accepted
-owner: platform-lead
-scope: [accounts, onboarding, billing, support]
-related: [proposal-add-account-status-api, jira://PLAT-142]
-reviewers: [api-owner, onboarding-lead]
-confidence: reviewed
-```
-
-At this point, agents can use the intent as approved problem context.
-
-### 4. Create A Design Before Implementation
-
-Create a design record:
+After the team agrees the proposal is worth exploring, create a design:
 
 ```bash
 haif new design "Account status API design"
 ```
 
-Capture the proposed route, response shape, compatibility notes, rollout plan, and known risks in `.haif/records/designs/`.
-
-Example frontmatter:
+Edit the generated file under `.haif/records/designs/`:
 
 ```yaml
 type: Design
@@ -351,14 +328,14 @@ tldr: Defines the v2 account-status endpoint, response fields, compatibility beh
 status: proposed
 owner: api-owner
 scope: [accounts, api-contract]
-related: [intent-add-account-status-api]
+related: [proposal-add-account-status-api]
 reviewers: [platform-lead, security-reviewer]
 confidence: draft
 ```
 
-Ask the agent to draft options, but keep the design in `proposed` until humans review it.
+Ask the agent to draft options, but keep the design in `proposed` until humans review it. Do not start coding from a proposed design.
 
-### 5. Record The Human Decision
+### 4. Record The Human Decision
 
 After design review, create a decision:
 
@@ -376,14 +353,14 @@ tldr: Approves the v2 endpoint with stable status enum, backward-compatible roll
 status: approved
 owner: api-owner
 scope: [accounts, api-contract]
-related: [intent-add-account-status-api, design-account-status-api]
+related: [proposal-add-account-status-api, design-account-status-api]
 reviewers: [platform-lead, security-reviewer]
 confidence: canonical
 ```
 
 Now an AI agent has reviewed context it can safely use for implementation.
 
-### 6. Run Preflight Before The Agent Codes
+### 5. Run Preflight Before The Agent Codes
 
 Before Codex, Claude, Cursor, or another agent starts implementation:
 
@@ -391,23 +368,17 @@ Before Codex, Claude, Cursor, or another agent starts implementation:
 haif preflight --scope accounts,api-contract
 ```
 
-If preflight reports missing intent, missing approved decision, or unresolved conflict, stop and review before coding.
+If preflight reports a missing approved decision or unresolved conflict, stop and review before coding.
 
-### 7. Create Execution Tasks
+### 6. Link Actual Implementation In Existing Tools
 
-Create implementation tasks only after intent and design are approved:
+Implementation is not a HAIF stage in v1. Actual work stays in Jira, GitHub, docs, tests, and release systems.
 
-```bash
-haif new task "Implement account status API endpoint"
-haif new task "Add account status API contract tests"
-haif new task "Update onboarding client to use account status API"
-```
+Use Jira tickets, PR descriptions, or docs to link back to the approved decision.
 
-Each task should link back to the accepted intent and approved decision.
+### 7. Optional: Capture Agent Work
 
-### 8. Capture Agent Work
-
-When an agent generates a plan, code, docs, or ticket breakdown, create an `AgentRun`:
+If your team wants more traceability, create an optional `AgentRun` when an agent generates a plan, code, docs, or ticket breakdown:
 
 ```bash
 haif new agent-run "Codex implementation plan for account status API"
@@ -421,7 +392,7 @@ Use the record to capture:
 - output generated
 - follow-up review needed
 
-### 9. Handle Conflicts Without Editing History
+### 8. Optional: Handle Conflicts Without Editing History
 
 Suppose another team is already changing account state for billing. Create a conflict:
 
@@ -441,28 +412,27 @@ haif resolve-conflict conflict-billing-account-state-change-overlaps-account-sta
 
 HAIF stores this in `.haif/reports/conflict-resolutions.jsonl` and `haif validate` checks that the report history was not manually edited.
 
-### 10. Use HAIF During PR Review
+### 9. Use HAIF During PR Review
 
 In the PR description, link the HAIF records:
 
 ```markdown
 HAIF:
-- Intent: intent-add-account-status-api
+- Proposal: proposal-add-account-status-api
 - Design: design-account-status-api
 - Decision: decision-approve-account-status-api-design
-- Tasks: task-implement-account-status-api-endpoint
 - AgentRun: agent-run-codex-implementation-plan-for-account-status-api
 ```
 
 Reviewers can quickly check:
 
-- Does the implementation match the approved intent?
+- Does the implementation match the approved decision?
 - Did the agent expand scope?
 - Did any API, data model, security, or ownership decision drift?
 - Are conflicts resolved through append-only reports?
 - Are docs generated from canonical records?
 
-### 11. Validate Before Merge
+### 10. Validate Before Merge
 
 Run:
 
@@ -474,14 +444,13 @@ Use HAIF as a coordination check, not a replacement for tests, security review, 
 
 ## Record Folders
 
-HAIF keeps records in stage-specific folders so teams do not end up with one large intent file or one crowded records directory.
+HAIF keeps records in stage-specific folders so teams do not end up with one large design file or one crowded records directory.
 
 ```text
 .haif/
   records/
     signals/
     proposals/
-    intents/
     designs/
     decisions/
     tasks/
@@ -492,13 +461,46 @@ HAIF keeps records in stage-specific folders so teams do not end up with one lar
 
 `haif new proposal "Title"` creates a file under `.haif/records/proposals/`.
 
-`haif new intent "Title"` creates a file under `.haif/records/intents/`.
+`haif new design "Title"` creates a file under `.haif/records/designs/`.
+
+`haif new decision "Title"` creates a file under `.haif/records/decisions/`.
+
+Use `--app` to keep records organized by application, service, or workstream:
+
+```bash
+haif new proposal "Add account status API" --app=accounts
+haif new design "Account status API design" --app=accounts
+haif new decision "Approve account status API design" --app=accounts
+```
+
+This creates:
+
+```text
+.haif/
+  records/
+    proposals/
+      accounts/
+    designs/
+      accounts/
+    decisions/
+      accounts/
+```
+
+Agents should use the stage folder first, then the application/workstream subfolder. For example, an API design for the accounts service belongs under `.haif/records/designs/accounts/`, not in a generic docs folder.
 
 Validation, preflight, overlap detection, review status, and context export read records recursively, so older flat `.haif/records/*.md` files still work.
 
 ## Conflict Resolution Reports
 
 Conflict records are historical records. When a conflict is resolved, HAIF appends a tamper-evident report instead of rewriting the conflict record.
+
+Conflicts can be created at any point, but the most important conflicts are decision conflicts: two approved or proposed decisions that point in different directions. Put those under the relevant application/workstream conflict folder and link the decisions with `--related`.
+
+```bash
+haif new conflict "Account status decision conflicts with billing state decision" \
+  --app=accounts \
+  --related=decision-approve-account-status-api-design,decision-billing-state-model
+```
 
 ```bash
 haif resolve-conflict conflict-example \
@@ -534,10 +536,9 @@ See [docs/tldr.md](docs/tldr.md) for TLDR guidance.
 
 - `Signal`: raw observation or issue.
 - `Proposal`: suggested work, not yet accepted.
-- `Intent`: accepted problem or opportunity with owner and scope.
 - `Design`: proposed technical or operational direction.
 - `Decision`: approved, rejected, or superseded direction.
-- `Task`: execution work, often mapped to Jira.
+- `Task`: optional extension record for execution work, often mapped to Jira.
 - `Review`: human review checkpoint.
 - `Conflict`: duplicate, overlapping, or contradictory work.
 - `AgentRun`: agent-generated plan, ticket, doc, or code summary.
@@ -547,8 +548,10 @@ See [docs/tldr.md](docs/tldr.md) for TLDR guidance.
 ```bash
 haif init
 haif validate
-haif new proposal "Title"
-haif new intent "Title"
+haif new proposal "Title" --app=app-name
+haif new design "Title" --app=app-name
+haif new decision "Title" --app=app-name
+haif new conflict "Title" --app=app-name --related=decision-a,decision-b
 haif preflight
 haif detect-overlap
 haif review-status
@@ -571,13 +574,9 @@ See [docs/python.md](docs/python.md).
 
 ## Human Review Rules
 
-HAIF expects human approval at important transitions:
+HAIF v1 expects human approval at the important transition:
 
-- `Proposal -> Intent`
-- `Intent -> Design`
 - `Design -> Decision`
-- `Decision -> Task`
-- `Implementation -> Review`
 - Major scope or design drift
 
 Agents may not approve their own proposals, designs, decisions, or release readiness.

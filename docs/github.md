@@ -6,15 +6,15 @@ GitHub owns code and review. HAIF owns shared intent.
 
 Every meaningful PR should link to:
 
-- an accepted `Intent`
-- an approved `Decision` or reviewed `Design`
-- a `Task` record or Jira ticket
+- an approved `Decision`
+- the related `Design` when design context matters
+- the related Jira ticket when execution is tracked in Jira
 
 ## Suggested PR Checklist
 
 ```markdown
-- [ ] Linked HAIF intent
-- [ ] Linked design or decision where needed
+- [ ] Linked approved HAIF decision
+- [ ] Linked design where needed
 - [ ] No unresolved HAIF conflict
 - [ ] Scope drift reviewed
 - [ ] AgentRun record created for significant AI-generated work

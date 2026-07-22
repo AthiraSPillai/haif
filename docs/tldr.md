@@ -15,7 +15,7 @@ Keep the TLDR to one or two sentences.
 Good:
 
 ```yaml
-tldr: This proposal suggests routing agent-created Jira tickets through HAIF intent review before they enter the committed backlog. Review is needed to confirm ownership, scope, and whether this should become official work.
+tldr: This proposal suggests routing agent-created Jira tickets through HAIF decision review before they enter the committed backlog. Review is needed to confirm ownership, scope, and whether this should become official work.
 ```
 
 Less useful:
@@ -40,4 +40,4 @@ Reviewers can use TLDRs to triage:
 - implementation work that may have drifted from design
 - conflicts that need a human decision
 
-The full record should still be read before approving intent, design, decisions, or release readiness.
+The full record should still be read before approving designs, decisions, or release readiness.

@@ -15,7 +15,7 @@ class HaifCoreTests(unittest.TestCase):
 
             self.assertEqual(len(records), 1)
             self.assertEqual(validate_records(records), [])
-            self.assertIn("No accepted intent found for this scope.", preflight(records))
+            self.assertIn("No approved decision found for this scope.", preflight(records))
 
 
 if __name__ == "__main__":

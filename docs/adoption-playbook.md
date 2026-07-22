@@ -5,7 +5,7 @@ Start small. Do not turn HAIF into ceremony.
 ## Week 1
 
 - Add `.haif/records` to one repo or project workspace.
-- Convert five active Jira tickets into HAIF intents or tasks.
+- Convert five active Jira tickets into HAIF proposals, designs, or decisions.
 - Convert two important decisions into HAIF decision records.
 
 ## Week 2

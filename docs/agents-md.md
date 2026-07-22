@@ -9,7 +9,7 @@ Use it to make HAIF enforceable in day-to-day work. The file tells agents what t
 HAIF has three complementary pieces:
 
 - `AGENTS.md`: tells agents how to behave in a specific repo.
-- `.haif/records`: stores shared intent, proposals, decisions, conflicts, and agent runs.
+- `.haif/records`: stores proposals, designs, decisions, conflicts, and agent runs.
 - `haif preflight`: checks whether work is ready for agent-assisted execution.
 
 In this model, `AGENTS.md` is the instruction layer, HAIF records are the coordination layer, and preflight is the enforcement check.
@@ -26,7 +26,7 @@ your-repo/
   .haif/
     records/
       proposals/
-      intents/
+      designs/
       decisions/
 ```
 
@@ -38,7 +38,7 @@ The HAIF `AGENTS.md` instructs agents to:
 - read `.haif/records` before significant work
 - run `haif preflight` when available
 - distinguish proposal from committed work
-- stop when intent, owner, approval, or conflict resolution is missing
+- stop when an approved decision, owner, or conflict resolution is missing
 - link plans, PRs, docs, and implementation back to HAIF records
 - request design review when implementation drifts
 
@@ -46,7 +46,7 @@ The HAIF `AGENTS.md` instructs agents to:
 
 Use this as the first rule in repos using agents:
 
-> Agents can propose work, summarize context, and draft implementation plans, but committed tickets and design direction should link to a human-reviewed HAIF intent.
+> Agents can propose work, summarize context, and draft designs, but committed tickets and implementation should link to a human-approved HAIF decision.
 
 ## Codex And Claude
 
@@ -62,15 +62,15 @@ For example, a Jira ticket-creation skill should:
 
 - check HAIF records before creating tickets
 - create a `Proposal` if the work is only suggested
-- require an accepted `Intent` before creating committed execution tickets
+- require an approved `Decision` before creating committed execution tickets
 - record the agent activity as an `AgentRun`
 - stop if there is an unresolved `Conflict`
 
 A code implementation skill should:
 
 - run HAIF preflight before planning or editing
-- link its plan to an accepted `Intent`
-- link implementation to an approved `Decision` or reviewed `Design`
+- link its plan to a `Proposal`, `Design`, or approved `Decision`
+- link implementation to an approved `Decision`
 - create a review note if implementation drifts from design
 
 This keeps skills from becoming isolated automation. They become HAIF-aware workflows that preserve shared human review and alignment.

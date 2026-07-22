@@ -5,8 +5,8 @@ Use HAIF records as trusted context before Claude or Claude Code creates plans, 
 ## Claude Instruction
 
 - Check `.haif/records` before proposing work.
-- Distinguish proposal, intent, design, decision, and task.
-- Ask for review if the work lacks accepted intent or approved design.
+- Distinguish proposal, design, decision, and optional extension records.
+- Ask for review if the work lacks an approved decision.
 - Record significant outputs as `AgentRun` records.
 - Mark generated docs as draft unless a human review record promotes them.
 
@@ -20,7 +20,7 @@ Claude commands, prompts, or reusable workflows should use HAIF records as their
 
 - read `.haif/records` before planning
 - create `Proposal` or `AgentRun` records for significant generated work
-- require accepted `Intent` and reviewed `Design` before implementation
+- require an approved `Decision` before implementation
 - stop when unresolved conflicts or missing owners appear
 
 The workflow can be automated, but approval remains human-owned.

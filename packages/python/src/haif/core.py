@@ -34,11 +34,12 @@ Before significant planning, ticket creation, docs, or code changes:
 
 1. Read relevant records in `.haif/records`.
 2. Run `haif preflight` if available.
-3. Continue only if there is accepted intent and no unresolved conflict.
-4. If intent is missing, create a HAIF `Proposal` instead of starting implementation.
-5. If implementation changes scope, APIs, data models, security, or architecture, stop and request human review.
+3. Continue to implementation only if there is an approved HAIF `Decision` and no unresolved conflict.
+4. If alignment is missing, create a HAIF `Proposal` instead of starting implementation.
+5. If solution details are unclear, create or update a HAIF `Design`.
+6. If implementation changes scope, APIs, data models, security, or architecture, stop and request human review.
 
-Agents may propose work, but humans approve intent, design, decisions, and release readiness.
+Agents may create proposals and draft designs, but humans approve decisions before implementation.
 """.format(marker=HAIF_AGENT_SECTION_MARKER)
 
 
@@ -83,18 +84,22 @@ def ensure_agents_md(root: Optional[Path] = None) -> Path:
     return path
 
 
-def create_record(record_type: str, title: str, root: Optional[Path] = None) -> Path:
+def create_record(record_type: str, title: str, root: Optional[Path] = None, app: str = "", related: Sequence[str] = ()) -> Path:
     normalized = normalize_type(record_type)
     now = datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
     record_id = "{}-{}".format(record_type.lower(), slug(title))
     init_records(root)
     directory = records_dir(root) / RECORD_FOLDERS[normalized]
+    if app:
+        directory = directory / slug(app)
     directory.mkdir(parents=True, exist_ok=True)
     path = directory / "{}.md".format(record_id)
     if path.exists():
         raise ValueError("Record already exists: {}".format(path))
 
     status = "accepted" if normalized == "Intent" else "proposed"
+    scope_value = "[{}]".format(slug(app)) if app else "[]"
+    related_value = "[{}]".format(", ".join(related)) if related else "[]"
     path.write_text(
         "---\n"
         "type: {type}\n"
@@ -107,13 +112,13 @@ def create_record(record_type: str, title: str, root: Optional[Path] = None) -> 
         "created_at: {now}\n"
         "updated_at: {now}\n"
         "source: local\n"
-        "scope: []\n"
-        "related: []\n"
+        "scope: {scope}\n"
+        "related: {related}\n"
         "reviewers: []\n"
         "confidence: draft\n"
         "---\n\n"
         "# {title}\n\n"
-        "Describe the work, context, and review needs.\n".format(type=normalized, id=record_id, title=title, status=status, now=now),
+        "Describe the work, context, and review needs.\n".format(type=normalized, id=record_id, title=title, status=status, now=now, scope=scope_value, related=related_value),
         encoding="utf-8",
     )
     return path
@@ -185,7 +190,6 @@ def preflight(records: Sequence[HaifRecord], scope: Sequence[str] = ()) -> List[
     scoped = filter_by_scope(records, scope)
     resolved = resolved_conflict_ids()
     issues: List[str] = []
-    accepted_intent = any(record.data.get("type") == "Intent" and str(record.data.get("status")) in APPROVED_STATUSES for record in scoped)
     approved_decision = any(record.data.get("type") == "Decision" and record.data.get("status") == "approved" for record in scoped)
     unresolved_conflict = any(
         record.data.get("type") == "Conflict"
@@ -193,8 +197,6 @@ def preflight(records: Sequence[HaifRecord], scope: Sequence[str] = ()) -> List[
         and str(record.data.get("status")) not in {"rejected", "superseded", "released"}
         for record in scoped
     )
-    if not accepted_intent:
-        issues.append("No accepted intent found for this scope.")
     if not approved_decision:
         issues.append("No approved decision found for this scope.")
     if unresolved_conflict:
