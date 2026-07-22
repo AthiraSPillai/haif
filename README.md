@@ -252,6 +252,226 @@ For a small pilot, start with only three record types:
 
 Add the rest of the lifecycle after the team has used this for a few real tasks.
 
+## Tutorial: Updating An API With HAIF
+
+This example shows how a team can use HAIF when an AI agent is helping create or update an API.
+
+Scenario:
+
+> The team wants to add `GET /v2/accounts/{id}/status` so onboarding, billing, and support tools can use one shared account-status contract.
+
+### 1. Initialize HAIF In The Project
+
+Run this once in the project repo:
+
+```bash
+haif init
+```
+
+This creates:
+
+```text
+AGENTS.md
+.haif/
+  records/
+    proposals/
+    intents/
+    designs/
+    decisions/
+    tasks/
+    conflicts/
+    agent-runs/
+```
+
+### 2. Start With A Proposal
+
+Before asking an agent to design or implement the API, create a proposal:
+
+```bash
+haif new proposal "Add account status API"
+```
+
+Edit the generated file under `.haif/records/proposals/`:
+
+```yaml
+type: Proposal
+id: proposal-add-account-status-api
+title: Add account status API
+tldr: Proposes a shared account-status API so onboarding, billing, and support stop deriving status differently.
+status: proposed
+owner: platform-lead
+scope: [accounts, onboarding, billing, support]
+related: [jira://PLAT-142]
+```
+
+The proposal is not committed work yet. It is a reviewable suggestion.
+
+### 3. Promote Accepted Work To Intent
+
+After human review, create an intent:
+
+```bash
+haif new intent "Add account status API"
+```
+
+Edit the generated file under `.haif/records/intents/`:
+
+```yaml
+type: Intent
+id: intent-add-account-status-api
+title: Add account status API
+tldr: Accepted work to create one owned account-status contract for onboarding, billing, and support.
+status: accepted
+owner: platform-lead
+scope: [accounts, onboarding, billing, support]
+related: [proposal-add-account-status-api, jira://PLAT-142]
+reviewers: [api-owner, onboarding-lead]
+confidence: reviewed
+```
+
+At this point, agents can use the intent as approved problem context.
+
+### 4. Create A Design Before Implementation
+
+Create a design record:
+
+```bash
+haif new design "Account status API design"
+```
+
+Capture the proposed route, response shape, compatibility notes, rollout plan, and known risks in `.haif/records/designs/`.
+
+Example frontmatter:
+
+```yaml
+type: Design
+id: design-account-status-api
+title: Account status API design
+tldr: Defines the v2 account-status endpoint, response fields, compatibility behavior, and rollout plan.
+status: proposed
+owner: api-owner
+scope: [accounts, api-contract]
+related: [intent-add-account-status-api]
+reviewers: [platform-lead, security-reviewer]
+confidence: draft
+```
+
+Ask the agent to draft options, but keep the design in `proposed` until humans review it.
+
+### 5. Record The Human Decision
+
+After design review, create a decision:
+
+```bash
+haif new decision "Approve account status API design"
+```
+
+Edit `.haif/records/decisions/`:
+
+```yaml
+type: Decision
+id: decision-approve-account-status-api-design
+title: Approve account status API design
+tldr: Approves the v2 endpoint with stable status enum, backward-compatible rollout, and explicit owner.
+status: approved
+owner: api-owner
+scope: [accounts, api-contract]
+related: [intent-add-account-status-api, design-account-status-api]
+reviewers: [platform-lead, security-reviewer]
+confidence: canonical
+```
+
+Now an AI agent has reviewed context it can safely use for implementation.
+
+### 6. Run Preflight Before The Agent Codes
+
+Before Codex, Claude, Cursor, or another agent starts implementation:
+
+```bash
+haif preflight --scope accounts,api-contract
+```
+
+If preflight reports missing intent, missing approved decision, or unresolved conflict, stop and review before coding.
+
+### 7. Create Execution Tasks
+
+Create implementation tasks only after intent and design are approved:
+
+```bash
+haif new task "Implement account status API endpoint"
+haif new task "Add account status API contract tests"
+haif new task "Update onboarding client to use account status API"
+```
+
+Each task should link back to the accepted intent and approved decision.
+
+### 8. Capture Agent Work
+
+When an agent generates a plan, code, docs, or ticket breakdown, create an `AgentRun`:
+
+```bash
+haif new agent-run "Codex implementation plan for account status API"
+```
+
+Use the record to capture:
+
+- source records used
+- files touched
+- assumptions made
+- output generated
+- follow-up review needed
+
+### 9. Handle Conflicts Without Editing History
+
+Suppose another team is already changing account state for billing. Create a conflict:
+
+```bash
+haif new conflict "Billing account state change overlaps account status API"
+```
+
+After human review, append a resolution report instead of editing the original conflict:
+
+```bash
+haif resolve-conflict conflict-billing-account-state-change-overlaps-account-status-api \
+  --outcome=resolved \
+  --summary="Billing keeps its internal state field, but public consumers use the new account-status API contract." \
+  --reviewer="platform-lead" \
+  --related=decision-approve-account-status-api-design
+```
+
+HAIF stores this in `.haif/reports/conflict-resolutions.jsonl` and `haif validate` checks that the report history was not manually edited.
+
+### 10. Use HAIF During PR Review
+
+In the PR description, link the HAIF records:
+
+```markdown
+HAIF:
+- Intent: intent-add-account-status-api
+- Design: design-account-status-api
+- Decision: decision-approve-account-status-api-design
+- Tasks: task-implement-account-status-api-endpoint
+- AgentRun: agent-run-codex-implementation-plan-for-account-status-api
+```
+
+Reviewers can quickly check:
+
+- Does the implementation match the approved intent?
+- Did the agent expand scope?
+- Did any API, data model, security, or ownership decision drift?
+- Are conflicts resolved through append-only reports?
+- Are docs generated from canonical records?
+
+### 11. Validate Before Merge
+
+Run:
+
+```bash
+haif validate
+```
+
+Use HAIF as a coordination check, not a replacement for tests, security review, or architecture review.
+
 ## Record Folders
 
 HAIF keeps records in stage-specific folders so teams do not end up with one large intent file or one crowded records directory.
@@ -330,10 +550,10 @@ haif validate
 haif new proposal "Title"
 haif new intent "Title"
 haif preflight
-  haif detect-overlap
-  haif review-status
-  haif export-context
-  haif resolve-conflict conflict-id --outcome=resolved --summary="..." --reviewer="..."
+haif detect-overlap
+haif review-status
+haif export-context
+haif resolve-conflict conflict-id --outcome=resolved --summary="..." --reviewer="..."
 ```
 
 ## Python Support
