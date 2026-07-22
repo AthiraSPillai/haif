@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 
 type RecordType =
@@ -19,6 +20,18 @@ type HaifRecord = {
   data: Record<string, unknown>;
 };
 
+type ConflictResolutionReport = {
+  type: "ConflictResolution";
+  conflict_id: string;
+  outcome: string;
+  summary: string;
+  reviewer: string;
+  created_at: string;
+  related: string[];
+  previous_hash: string;
+  hash: string;
+};
+
 const requiredFields = ["type", "id", "title", "status", "owner", "created_by", "created_at", "updated_at"];
 const allowedTypes = new Set<RecordType>([
   "Signal",
@@ -32,6 +45,7 @@ const allowedTypes = new Set<RecordType>([
   "AgentRun",
 ]);
 const approvedStatuses = new Set(["accepted", "reviewed", "approved", "released"]);
+const resolvedConflictOutcomes = new Set(["resolved", "merged", "rejected", "superseded"]);
 const recordFolders: Record<RecordType, string> = {
   Signal: "signals",
   Proposal: "proposals",
@@ -78,6 +92,8 @@ export function main(args: string[]): number {
         return reviewStatus();
       case "export-context":
         return exportContext(rest);
+      case "resolve-conflict":
+        return resolveConflict(rest);
       case "-h":
       case "--help":
       case undefined:
@@ -98,8 +114,17 @@ function recordsDir(): string {
   return resolve(process.cwd(), ".haif", "records");
 }
 
+function reportsDir(): string {
+  return resolve(process.cwd(), ".haif", "reports");
+}
+
+function conflictReportsPath(): string {
+  return join(reportsDir(), "conflict-resolutions.jsonl");
+}
+
 function init(): number {
   mkdirSync(recordsDir(), { recursive: true });
+  mkdirSync(reportsDir(), { recursive: true });
   for (const folder of Object.values(recordFolders)) {
     mkdirSync(join(recordsDir(), folder), { recursive: true });
   }
@@ -147,6 +172,7 @@ function validate(): number {
   for (const record of records) {
     issues.push(...validateRecord(record));
   }
+  issues.push(...validateConflictResolutionLog());
 
   if (issues.length > 0) {
     console.error("HAIF validation failed:");
@@ -162,10 +188,11 @@ function validate(): number {
 function preflight(args: string[]): number {
   const scope = parseScope(args);
   const records = filterByScope(loadRecords(), scope);
+  const resolvedConflicts = resolvedConflictIds();
   const issues: string[] = [];
   const acceptedIntent = records.some((record) => record.data.type === "Intent" && approvedStatuses.has(String(record.data.status)));
   const approvedDecision = records.some((record) => record.data.type === "Decision" && String(record.data.status) === "approved");
-  const unresolvedConflict = records.some((record) => record.data.type === "Conflict" && !["rejected", "superseded", "released"].includes(String(record.data.status)));
+  const unresolvedConflict = records.some((record) => record.data.type === "Conflict" && !resolvedConflicts.has(String(record.data.id)) && !["rejected", "superseded", "released"].includes(String(record.data.status)));
 
   if (!acceptedIntent) issues.push("No accepted intent found for this scope.");
   if (!approvedDecision) issues.push("No approved decision found for this scope.");
@@ -232,6 +259,44 @@ function exportContext(args: string[]): number {
     console.log(record.body.trim());
     console.log("\n---\n");
   }
+  return 0;
+}
+
+function resolveConflict(args: string[]): number {
+  const [conflictId, ...rest] = args;
+  if (!conflictId) {
+    throw new Error("Usage: haif resolve-conflict <conflict-id> --outcome=resolved --summary=\"...\" --reviewer=\"...\" [--related=a,b]");
+  }
+  const outcome = requiredOption(rest, "outcome");
+  const summary = requiredOption(rest, "summary");
+  const reviewer = requiredOption(rest, "reviewer");
+  if (!resolvedConflictOutcomes.has(outcome)) {
+    throw new Error(`Invalid outcome ${outcome}. Use one of: ${Array.from(resolvedConflictOutcomes).join(", ")}`);
+  }
+  const conflicts = loadRecords().filter((record) => record.data.type === "Conflict" && record.data.id === conflictId);
+  if (conflicts.length === 0) {
+    throw new Error(`Conflict record not found: ${conflictId}`);
+  }
+  const reports = loadConflictResolutionReports();
+  const previousHash = reports.length > 0 ? reports[reports.length - 1].hash : "GENESIS";
+  const reportWithoutHash = {
+    type: "ConflictResolution" as const,
+    conflict_id: conflictId,
+    outcome,
+    summary,
+    reviewer,
+    created_at: new Date().toISOString(),
+    related: optionValue(rest, "related").split(",").map((value) => value.trim()).filter(Boolean),
+    previous_hash: previousHash,
+  };
+  const report: ConflictResolutionReport = {
+    ...reportWithoutHash,
+    hash: hashReport(reportWithoutHash),
+  };
+  mkdirSync(reportsDir(), { recursive: true });
+  appendFileSync(conflictReportsPath(), `${JSON.stringify(report)}\n`, "utf8");
+  console.log(`Appended conflict resolution report for ${conflictId}`);
+  console.log(`hash=${report.hash}`);
   return 0;
 }
 
@@ -308,10 +373,87 @@ function validateRecord(record: HaifRecord): string[] {
   return issues;
 }
 
+function validateConflictResolutionLog(): string[] {
+  const issues: string[] = [];
+  const path = conflictReportsPath();
+  if (!existsSync(path)) return issues;
+  const lines = readFileSync(path, "utf8").split(/\r?\n/).filter((line) => line.trim().length > 0);
+  const reports: ConflictResolutionReport[] = [];
+  for (const [index, line] of lines.entries()) {
+    try {
+      reports.push(JSON.parse(line) as ConflictResolutionReport);
+    } catch {
+      issues.push(`conflict-resolutions.jsonl line ${index + 1} is invalid JSON`);
+    }
+  }
+  let previousHash = "GENESIS";
+  for (const [index, report] of reports.entries()) {
+    const expectedPrevious = previousHash;
+    if (report.previous_hash !== expectedPrevious) {
+      issues.push(`conflict-resolutions.jsonl line ${index + 1} has invalid previous_hash`);
+    }
+    const { hash, ...withoutHash } = report;
+    const expectedHash = hashReport(withoutHash);
+    if (hash !== expectedHash) {
+      issues.push(`conflict-resolutions.jsonl line ${index + 1} hash mismatch; report may have been edited`);
+    }
+    previousHash = hash;
+  }
+  return issues;
+}
+
+function loadConflictResolutionReports(throwOnInvalidJson = true): ConflictResolutionReport[] {
+  const path = conflictReportsPath();
+  if (!existsSync(path)) return [];
+  const lines = readFileSync(path, "utf8").split(/\r?\n/).filter((line) => line.trim().length > 0);
+  const reports: ConflictResolutionReport[] = [];
+  for (const [index, line] of lines.entries()) {
+    try {
+      reports.push(JSON.parse(line) as ConflictResolutionReport);
+    } catch (error) {
+      if (throwOnInvalidJson) throw new Error(`Invalid JSON in conflict-resolutions.jsonl line ${index + 1}`);
+    }
+  }
+  return reports;
+}
+
+function resolvedConflictIds(): Set<string> {
+  const ids = new Set<string>();
+  for (const report of loadConflictResolutionReports()) {
+    if (resolvedConflictOutcomes.has(report.outcome)) ids.add(report.conflict_id);
+  }
+  return ids;
+}
+
+function hashReport(report: Omit<ConflictResolutionReport, "hash">): string {
+  return createHash("sha256").update(stableStringify(report)).digest("hex");
+}
+
+function stableStringify(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map((item) => stableStringify(item)).join(",")}]`;
+  if (value && typeof value === "object") {
+    const record = value as Record<string, unknown>;
+    return `{${Object.keys(record).sort().map((key) => `${JSON.stringify(key)}:${stableStringify(record[key])}`).join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
 function parseScope(args: string[]): string[] {
   const scopeArg = args.find((arg) => arg.startsWith("--scope="));
   if (!scopeArg) return [];
   return scopeArg.slice("--scope=".length).split(",").map((value) => value.trim()).filter(Boolean);
+}
+
+function requiredOption(args: string[], name: string): string {
+  const value = optionValue(args, name);
+  if (!value) throw new Error(`Missing --${name}=...`);
+  return value;
+}
+
+function optionValue(args: string[], name: string): string {
+  const prefix = `--${name}=`;
+  const arg = args.find((value) => value.startsWith(prefix));
+  return arg ? arg.slice(prefix.length).trim() : "";
 }
 
 function filterByScope(records: HaifRecord[], scope: string[]): HaifRecord[] {
@@ -370,7 +512,8 @@ Usage:
   haif preflight [--scope=a,b]
   haif detect-overlap
   haif review-status
-  haif export-context [--scope=a,b]`);
+  haif export-context [--scope=a,b]
+  haif resolve-conflict <conflict-id> --outcome=resolved --summary="..." --reviewer="..."`);
 }
 
 process.exitCode = main(process.argv.slice(2));

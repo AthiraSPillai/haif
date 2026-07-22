@@ -42,6 +42,7 @@ Agents must not:
 - mark a design, decision, or release as approved
 - continue implementation when unresolved conflicts exist
 - silently expand scope across shared systems
+- edit conflict resolution reports manually
 
 ## Required Links
 
@@ -57,6 +58,10 @@ For significant work, link output back to HAIF records:
 ## Drift Rule
 
 If implementation changes architecture, APIs, data models, security behavior, ownership, or scope, create or request a design review before continuing.
+
+## Conflict Resolution Rule
+
+When a conflict is resolved, do not rewrite the original conflict record. Use `haif resolve-conflict` so HAIF appends a hash-chained resolution report under `.haif/reports/conflict-resolutions.jsonl`.
 
 ## Default Record Flow
 

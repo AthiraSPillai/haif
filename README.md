@@ -276,6 +276,25 @@ HAIF keeps records in stage-specific folders so teams do not end up with one lar
 
 Validation, preflight, overlap detection, review status, and context export read records recursively, so older flat `.haif/records/*.md` files still work.
 
+## Conflict Resolution Reports
+
+Conflict records are historical records. When a conflict is resolved, HAIF appends a tamper-evident report instead of rewriting the conflict record.
+
+```bash
+haif resolve-conflict conflict-example \
+  --outcome=resolved \
+  --summary="Human-reviewed resolution summary." \
+  --reviewer="reviewer-name"
+```
+
+Resolution reports are stored in:
+
+```text
+.haif/reports/conflict-resolutions.jsonl
+```
+
+Each report is hash-chained to the previous report. `haif validate` checks the chain and reports manual edits, reordered lines, or deleted history. See [docs/conflict-resolution.md](docs/conflict-resolution.md).
+
 ## Repo Contents
 
 - `docs/`: framework docs, lifecycle, review gates, Jira/Codex/Claude/GitHub guidance, and adoption playbook.
@@ -311,9 +330,10 @@ haif validate
 haif new proposal "Title"
 haif new intent "Title"
 haif preflight
-haif detect-overlap
-haif review-status
-haif export-context
+  haif detect-overlap
+  haif review-status
+  haif export-context
+  haif resolve-conflict conflict-id --outcome=resolved --summary="..." --reviewer="..."
 ```
 
 ## Python Support

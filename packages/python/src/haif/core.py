@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timezone
+import hashlib
+import json
 from pathlib import Path
 import re
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
@@ -10,6 +12,7 @@ from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 REQUIRED_FIELDS = ["type", "id", "title", "status", "owner", "created_by", "created_at", "updated_at"]
 ALLOWED_TYPES = {"Signal", "Proposal", "Intent", "Design", "Decision", "Task", "Review", "Conflict", "AgentRun"}
 APPROVED_STATUSES = {"accepted", "reviewed", "approved", "released"}
+RESOLVED_CONFLICT_OUTCOMES = {"resolved", "merged", "rejected", "superseded"}
 RECORD_FOLDERS = {
     "Signal": "signals",
     "Proposal": "proposals",
@@ -50,9 +53,18 @@ def records_dir(root: Optional[Path] = None) -> Path:
     return (root or Path.cwd()) / ".haif" / "records"
 
 
+def reports_dir(root: Optional[Path] = None) -> Path:
+    return (root or Path.cwd()) / ".haif" / "reports"
+
+
+def conflict_reports_path(root: Optional[Path] = None) -> Path:
+    return reports_dir(root) / "conflict-resolutions.jsonl"
+
+
 def init_records(root: Optional[Path] = None) -> Path:
     directory = records_dir(root)
     directory.mkdir(parents=True, exist_ok=True)
+    reports_dir(root).mkdir(parents=True, exist_ok=True)
     for folder in RECORD_FOLDERS.values():
         (directory / folder).mkdir(parents=True, exist_ok=True)
     ensure_agents_md(root)
@@ -148,6 +160,7 @@ def validate_records(records: Sequence[HaifRecord]) -> List[str]:
     issues: List[str] = []
     for record in records:
         issues.extend(validate_record(record))
+    issues.extend(validate_conflict_resolution_log())
     return issues
 
 
@@ -170,11 +183,14 @@ def validate_record(record: HaifRecord) -> List[str]:
 
 def preflight(records: Sequence[HaifRecord], scope: Sequence[str] = ()) -> List[str]:
     scoped = filter_by_scope(records, scope)
+    resolved = resolved_conflict_ids()
     issues: List[str] = []
     accepted_intent = any(record.data.get("type") == "Intent" and str(record.data.get("status")) in APPROVED_STATUSES for record in scoped)
     approved_decision = any(record.data.get("type") == "Decision" and record.data.get("status") == "approved" for record in scoped)
     unresolved_conflict = any(
-        record.data.get("type") == "Conflict" and str(record.data.get("status")) not in {"rejected", "superseded", "released"}
+        record.data.get("type") == "Conflict"
+        and str(record.data.get("id")) not in resolved
+        and str(record.data.get("status")) not in {"rejected", "superseded", "released"}
         for record in scoped
     )
     if not accepted_intent:
@@ -184,6 +200,84 @@ def preflight(records: Sequence[HaifRecord], scope: Sequence[str] = ()) -> List[
     if unresolved_conflict:
         issues.append("Unresolved conflict found for this scope.")
     return issues
+
+
+def resolve_conflict(conflict_id: str, outcome: str, summary: str, reviewer: str, related: Sequence[str] = (), root: Optional[Path] = None) -> Dict[str, Any]:
+    if outcome not in RESOLVED_CONFLICT_OUTCOMES:
+        raise ValueError("Invalid outcome {}. Use one of: {}".format(outcome, ", ".join(sorted(RESOLVED_CONFLICT_OUTCOMES))))
+    conflicts = [record for record in load_records(root) if record.data.get("type") == "Conflict" and record.data.get("id") == conflict_id]
+    if not conflicts:
+        raise ValueError("Conflict record not found: {}".format(conflict_id))
+    reports = load_conflict_resolution_reports(root)
+    previous_hash = reports[-1]["hash"] if reports else "GENESIS"
+    report = {
+        "type": "ConflictResolution",
+        "conflict_id": conflict_id,
+        "outcome": outcome,
+        "summary": summary,
+        "reviewer": reviewer,
+        "created_at": datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z"),
+        "related": list(related),
+        "previous_hash": previous_hash,
+    }
+    report["hash"] = hash_report(report)
+    reports_dir(root).mkdir(parents=True, exist_ok=True)
+    with conflict_reports_path(root).open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(report, separators=(",", ":")) + "\n")
+    return report
+
+
+def validate_conflict_resolution_log(root: Optional[Path] = None) -> List[str]:
+    issues: List[str] = []
+    previous_hash = "GENESIS"
+    path = conflict_reports_path(root)
+    if not path.exists():
+        return issues
+    reports: List[Dict[str, Any]] = []
+    for index, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        if not line.strip():
+            continue
+        try:
+            reports.append(json.loads(line))
+        except ValueError:
+            issues.append("conflict-resolutions.jsonl line {} is invalid JSON".format(index))
+    for index, report in enumerate(reports, start=1):
+        if report.get("previous_hash") != previous_hash:
+            issues.append("conflict-resolutions.jsonl line {} has invalid previous_hash".format(index))
+        expected_hash = hash_report({key: value for key, value in report.items() if key != "hash"})
+        if report.get("hash") != expected_hash:
+            issues.append("conflict-resolutions.jsonl line {} hash mismatch; report may have been edited".format(index))
+        previous_hash = str(report.get("hash"))
+    return issues
+
+
+def load_conflict_resolution_reports(root: Optional[Path] = None, throw_on_invalid_json: bool = True) -> List[Dict[str, Any]]:
+    path = conflict_reports_path(root)
+    if not path.exists():
+        return []
+    reports: List[Dict[str, Any]] = []
+    for index, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        if not line.strip():
+            continue
+        try:
+            reports.append(json.loads(line))
+        except ValueError:
+            if throw_on_invalid_json:
+                raise ValueError("Invalid JSON in conflict-resolutions.jsonl line {}".format(index))
+    return reports
+
+
+def resolved_conflict_ids(root: Optional[Path] = None) -> Set[str]:
+    return {
+        str(report.get("conflict_id"))
+        for report in load_conflict_resolution_reports(root)
+        if report.get("outcome") in RESOLVED_CONFLICT_OUTCOMES
+    }
+
+
+def hash_report(report: Dict[str, Any]) -> str:
+    payload = json.dumps(report, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 def detect_overlap(records: Sequence[HaifRecord]) -> List[Tuple[str, str, int]]:
