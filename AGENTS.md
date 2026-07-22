@@ -27,6 +27,8 @@ Before significant planning, Jira ticket creation, documentation, code generatio
 
 When creating HAIF records, use the stage folder first and the application, service, or workstream subfolder second.
 
+Agent-created documentation must follow the HAIF flow. Create the doc as a `Proposal` when the work is only suggested, as a `Design` when it describes an approach, and as a `Decision` only when a human-approved direction is being recorded.
+
 Examples:
 
 ```bash
@@ -80,6 +82,14 @@ For significant work, link output back to HAIF records:
 ## Drift Rule
 
 If implementation changes architecture, APIs, data models, security behavior, ownership, or scope, create or request a design review before continuing.
+
+If an agent-created or agent-updated design, document, ticket, or implementation drifts from an approved decision, treat the approved `Decision` as the source of truth. First try to correct the draft, doc, ticket, or implementation back to that decision. If the drift cannot be corrected safely, stop and create a drift conflict:
+
+```bash
+haif drift-conflict --app=accounts --decision=decision-id --artifact=design-or-doc-id --summary="Short reviewer-focused drift summary."
+```
+
+Do not update the approved decision directly. If the decision may need to change, request human review and capture the disagreement as a `Conflict` or new `Proposal`.
 
 ## Conflict Resolution Rule
 

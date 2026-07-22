@@ -1,68 +1,88 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
   <title id="title">HAIF v1 flow</title>
-  <desc id="desc">A diagram showing the simplified HAIF v1 flow from proposal to design to decision, then implementation in existing tools.</desc>
+  <desc id="desc">A diagram showing the HAIF v1 flow from proposal to design to decision, then implementation and document updates, with conflict checks against the approved decision.</desc>
   <defs>
     <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
       <path d="M2,2 L10,6 L2,10 Z" fill="#263244"/>
+    </marker>
+    <marker id="warnArrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#b56b16"/>
     </marker>
     <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
       <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#162033" flood-opacity="0.14"/>
     </filter>
     <style>
       .bg { fill: #f7f5ef; }
-      .brand { font: 700 15px Arial, sans-serif; fill: #2f5d48; letter-spacing: 0.4px; }
+      .brand { font: 700 15px Arial, sans-serif; fill: #2f5d48; letter-spacing: 0.3px; }
       .title { font: 700 34px Arial, sans-serif; fill: #172033; }
       .subtitle { font: 400 18px Arial, sans-serif; fill: #526071; }
-      .box { fill: #ffffff; stroke: #d6d1c5; stroke-width: 2; rx: 8; filter: url(#shadow); }
       .core { fill: #eef6f2; stroke: #81aa96; stroke-width: 2.4; rx: 8; filter: url(#shadow); }
       .decision { fill: #fff3df; stroke: #dba44a; stroke-width: 2.4; rx: 8; filter: url(#shadow); }
       .tools { fill: #eef4ff; stroke: #80a8d8; stroke-width: 2.4; rx: 8; filter: url(#shadow); }
-      .extension { fill: #ffffff; stroke: #c9c2b5; stroke-width: 1.7; rx: 8; }
-      .label { font: 700 23px Arial, sans-serif; fill: #172033; text-anchor: middle; }
-      .small { font: 400 16px Arial, sans-serif; fill: #526071; text-anchor: middle; }
-      .tiny { font: 600 14px Arial, sans-serif; fill: #526071; text-anchor: middle; }
+      .conflict { fill: #fff7e8; stroke: #dba44a; stroke-width: 2.4; rx: 8; filter: url(#shadow); }
+      .review { fill: #ffffff; stroke: #d6d1c5; stroke-width: 2; rx: 8; filter: url(#shadow); }
+      .label { font: 700 22px Arial, sans-serif; fill: #172033; text-anchor: middle; }
+      .small { font: 400 15px Arial, sans-serif; fill: #526071; text-anchor: middle; }
+      .tiny { font: 600 13px Arial, sans-serif; fill: #526071; text-anchor: middle; }
       .arrow { stroke: #263244; stroke-width: 3; fill: none; marker-end: url(#arrow); }
-      .dashed { stroke: #526071; stroke-width: 2.4; fill: none; stroke-dasharray: 8 8; marker-end: url(#arrow); }
+      .warn { stroke: #b56b16; stroke-width: 3; fill: none; marker-end: url(#warnArrow); }
+      .dash { stroke: #526071; stroke-width: 2.4; fill: none; stroke-dasharray: 8 8; marker-end: url(#arrow); }
     </style>
   </defs>
 
-  <rect class="bg" width="1200" height="680"/>
+  <rect class="bg" width="1200" height="720"/>
   <rect x="70" y="34" width="350" height="30" rx="15" fill="#e6f1eb" stroke="#8bb8a2"/>
   <text class="brand" x="90" y="54">HAIF: Human-Agent Intent Framework</text>
   <text class="title" x="70" y="96">HAIF v1 Flow</text>
-  <text class="subtitle" x="70" y="127">Keep coordination simple: proposal, design, decision, then implementation in existing tools.</text>
+  <text class="subtitle" x="70" y="127">Agents draft work, humans approve decisions, and approved decisions remain the source of truth.</text>
 
-  <rect class="core" x="80" y="230" width="230" height="145" rx="8"/>
-  <text class="label" x="195" y="278">Proposal</text>
-  <text class="small" x="195" y="314">Should we do this?</text>
-  <text class="tiny" x="195" y="344">Possible work</text>
+  <rect class="core" x="70" y="210" width="220" height="145" rx="8"/>
+  <text class="label" x="180" y="256">Proposal</text>
+  <text class="small" x="180" y="291">Should we do this?</text>
+  <text class="tiny" x="180" y="321">Idea, doc request,</text>
+  <text class="tiny" x="180" y="341">or ticket request</text>
 
-  <path class="arrow" d="M320 302 H425"/>
+  <path class="arrow" d="M300 282 H390"/>
 
-  <rect class="core" x="435" y="230" width="230" height="145" rx="8"/>
-  <text class="label" x="550" y="278">Design</text>
-  <text class="small" x="550" y="314">How should we do this?</text>
-  <text class="tiny" x="550" y="344">Approach and tradeoffs</text>
+  <rect class="core" x="400" y="210" width="220" height="145" rx="8"/>
+  <text class="label" x="510" y="256">Design</text>
+  <text class="small" x="510" y="291">How should we do it?</text>
+  <text class="tiny" x="510" y="321">Approach, API,</text>
+  <text class="tiny" x="510" y="341">tradeoffs</text>
 
-  <path class="arrow" d="M675 302 H780"/>
+  <path class="arrow" d="M630 282 H720"/>
 
-  <rect class="decision" x="790" y="230" width="230" height="145" rx="8"/>
-  <text class="label" x="905" y="278">Decision</text>
-  <text class="small" x="905" y="314">What was approved?</text>
-  <text class="tiny" x="905" y="344">Human-reviewed direction</text>
+  <rect class="decision" x="730" y="210" width="220" height="145" rx="8"/>
+  <text class="label" x="840" y="256">Decision</text>
+  <text class="small" x="840" y="291">What is approved?</text>
+  <text class="tiny" x="840" y="321">Human-reviewed</text>
+  <text class="tiny" x="840" y="341">source of truth</text>
 
-  <path class="arrow" d="M905 385 V455"/>
+  <path class="arrow" d="M960 282 H1040"/>
 
-  <rect class="tools" x="710" y="465" width="390" height="115" rx="8"/>
-  <text class="label" x="905" y="508">Actual Implementation</text>
-  <text class="small" x="905" y="542">Code | PRs | Jira | Docs | Tests | Releases</text>
+  <rect class="tools" x="970" y="210" width="180" height="145" rx="8"/>
+  <text class="label" x="1060" y="247">Work</text>
+  <text class="small" x="1060" y="280">Code, PRs, Jira,</text>
+  <text class="small" x="1060" y="304">docs, tests,</text>
+  <text class="small" x="1060" y="328">releases</text>
 
-  <path class="dashed" d="M198 386 C220 465, 325 520, 500 520"/>
-  <rect class="box" x="345" y="465" width="270" height="115" rx="8"/>
-  <text class="label" x="480" y="506">Optional Extensions</text>
-  <text class="small" x="480" y="536">Conflict | AgentRun</text>
-  <text class="small" x="480" y="560">Task | Review | Signal</text>
+  <rect class="review" x="375" y="435" width="300" height="130" rx="8"/>
+  <text class="label" x="525" y="475">Agent Doc Rule</text>
+  <text class="small" x="525" y="508">New docs must be placed in</text>
+  <text class="small" x="525" y="532">Proposal, Design, or Decision</text>
+  <text class="tiny" x="525" y="555">under the right app folder</text>
 
-  <text class="tiny" x="550" y="420">Agents may draft proposals and designs.</text>
-  <text class="tiny" x="550" y="445">Humans approve decisions before implementation.</text>
+  <path class="dash" d="M525 425 V365"/>
+
+  <rect class="conflict" x="765" y="430" width="330" height="145" rx="8"/>
+  <text class="label" x="930" y="469">Conflict Check</text>
+  <text class="small" x="930" y="502">If design, docs, tickets,</text>
+  <text class="small" x="930" y="526">or code drift from Decision,</text>
+  <text class="small" x="930" y="550">create Conflict with TLDR</text>
+
+  <path class="warn" d="M1060 365 V420"/>
+  <path class="warn" d="M930 425 V365"/>
+  <path class="dash" d="M765 504 C660 615, 450 625, 290 360"/>
+
+  <text class="tiny" x="600" y="638">When conflict is found, agents may propose a correction, but cannot change the approved decision without human review.</text>
 </svg>

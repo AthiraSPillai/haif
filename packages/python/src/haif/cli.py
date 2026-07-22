@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 import sys
 
-from .core import create_record, detect_overlap, export_context, init_records, load_records, preflight, resolve_conflict, validate_records
+from .core import create_drift_conflict, create_record, detect_overlap, export_context, init_records, load_records, preflight, resolve_conflict, validate_records
 
 
 def main(argv=None) -> int:
@@ -34,6 +34,12 @@ def main(argv=None) -> int:
     resolve_parser.add_argument("--summary", required=True)
     resolve_parser.add_argument("--reviewer", required=True)
     resolve_parser.add_argument("--related", default="")
+
+    drift_parser = subparsers.add_parser("drift-conflict")
+    drift_parser.add_argument("--app", required=True)
+    drift_parser.add_argument("--decision", required=True)
+    drift_parser.add_argument("--artifact", required=True)
+    drift_parser.add_argument("--summary", required=True)
 
     args = parser.parse_args(argv)
     if args.command == "init":
@@ -89,6 +95,10 @@ def main(argv=None) -> int:
         report = resolve_conflict(args.conflict_id, args.outcome, args.summary, args.reviewer, parse_scope(args.related))
         print("Appended conflict resolution report for {}".format(args.conflict_id))
         print("hash={}".format(report["hash"]))
+        return 0
+    if args.command == "drift-conflict":
+        path = create_drift_conflict(args.app, args.decision, args.artifact, args.summary)
+        print("Created drift conflict {}".format(path))
         return 0
 
     parser.print_help()

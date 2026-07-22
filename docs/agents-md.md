@@ -37,16 +37,43 @@ The HAIF `AGENTS.md` instructs agents to:
 - write or preserve the `tldr` field so human reviewers can focus quickly
 - read `.haif/records` before significant work
 - run `haif preflight` when available
+- classify new agent-created docs as `Proposal`, `Design`, or `Decision`
+- place new HAIF docs under the matching stage folder and app/workstream subfolder
 - distinguish proposal from committed work
 - stop when an approved decision, owner, or conflict resolution is missing
 - link plans, PRs, docs, and implementation back to HAIF records
-- request design review when implementation drifts
+- treat approved `Decision` records as the source of truth
+- create a `Conflict` with a TLDR when docs, tickets, designs, or implementation drift from a decision and cannot be corrected safely
 
 ## Team Rule To Add
 
 Use this as the first rule in repos using agents:
 
-> Agents can propose work, summarize context, and draft designs, but committed tickets and implementation should link to a human-approved HAIF decision.
+> Agents can propose work, summarize context, and draft designs, but committed tickets, docs, and implementation should link to a human-approved HAIF decision.
+
+## Agent-Created Docs
+
+When an agent creates or updates a document, it should first decide what kind of HAIF record it is:
+
+- `Proposal`: the work is suggested, exploratory, or not yet accepted.
+- `Design`: the approach is being drafted or revised.
+- `Decision`: a human-approved direction is being recorded.
+
+The agent should then place the record under the matching folder:
+
+```text
+.haif/records/proposals/<app>/
+.haif/records/designs/<app>/
+.haif/records/decisions/<app>/
+```
+
+Before and after updating a doc, the agent should compare it with related approved `Decision` records. If the doc drifts, the agent should correct the doc back to the decision when possible. If the correction is unclear or would change scope, the agent should create a conflict:
+
+```bash
+haif drift-conflict --app=accounts --decision=decision-id --artifact=doc-or-change-id --summary="Short reviewer-focused drift summary."
+```
+
+The approved decision remains the source of truth until humans approve a new decision.
 
 ## Codex And Claude
 
@@ -71,6 +98,7 @@ A code implementation skill should:
 - run HAIF preflight before planning or editing
 - link its plan to a `Proposal`, `Design`, or approved `Decision`
 - link implementation to an approved `Decision`
-- create a review note if implementation drifts from design
+- correct implementation back to the approved `Decision` when drift is found
+- create a drift conflict if the correction is unclear or may require a new decision
 
 This keeps skills from becoming isolated automation. They become HAIF-aware workflows that preserve shared human review and alignment.

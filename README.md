@@ -28,6 +28,8 @@ Proposal -> Design -> Decision -> actual implementation
 
 Agents can create proposals and draft designs. Humans approve decisions. Actual implementation stays in existing tools such as Jira, GitHub, docs, tests, and release systems.
 
+When an agent creates a new doc, it should not create a random standalone document. It should classify the document as a `Proposal`, `Design`, or `Decision`, place it in the matching `.haif/records` folder, and link it to the related workstream. If a new or updated doc, ticket, design, or implementation conflicts with an approved `Decision`, the decision is the source of truth. The agent should try to correct the artifact back to the decision; if it cannot, it should create a `Conflict` record with a reviewer-focused TLDR.
+
 ## If You Already Use AI Agents And Repo Instructions
 
 HAIF does not replace your existing agent instructions. It adds shared coordination state for Codex, Claude, Cursor, Copilot-style agents, and other AI agents to read before they act.
@@ -52,7 +54,8 @@ Before significant planning, ticket creation, docs, or code changes:
 3. Continue to implementation only if there is an approved HAIF `Decision` and no unresolved conflict.
 4. If alignment is missing, create a HAIF `Proposal` instead of starting implementation.
 5. If solution details are unclear, create or update a HAIF `Design`.
-6. If implementation changes scope, APIs, data models, security, or architecture, stop and request human review.
+6. Put new agent-created docs in the matching HAIF stage folder: `proposals`, `designs`, or `decisions`.
+7. If a doc, ticket, design, or implementation drifts from an approved `Decision`, treat the `Decision` as source of truth and create a `Conflict` if the artifact cannot be corrected safely.
 
 Agents may create proposals and draft designs, but humans approve decisions before implementation.
 ```
@@ -370,6 +373,18 @@ haif preflight --scope accounts,api-contract
 
 If preflight reports a missing approved decision or unresolved conflict, stop and review before coding.
 
+If the agent updates a design document, doc, ticket, or implementation in a way that drifts from the approved decision, create a drift conflict:
+
+```bash
+haif drift-conflict \
+  --app=accounts \
+  --decision=decision-approve-account-status-api-design \
+  --artifact=design-account-status-api \
+  --summary="The updated design changes the response shape approved in the decision."
+```
+
+HAIF creates the conflict file under `.haif/records/conflicts/accounts/` and pre-fills it with the TLDR, source decision, drifting artifact, observed drift, agent action, and human review questions. The agent should correct the artifact back to the approved decision when possible; if the approved decision may need to change, humans review and create a new decision.
+
 ### 6. Link Actual Implementation In Existing Tools
 
 Implementation is not a HAIF stage in v1. Actual work stays in Jira, GitHub, docs, tests, and release systems.
@@ -552,6 +567,7 @@ haif new proposal "Title" --app=app-name
 haif new design "Title" --app=app-name
 haif new decision "Title" --app=app-name
 haif new conflict "Title" --app=app-name --related=decision-a,decision-b
+haif drift-conflict --app=app-name --decision=decision-id --artifact=design-or-doc-id --summary="..."
 haif preflight
 haif detect-overlap
 haif review-status

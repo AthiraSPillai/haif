@@ -70,7 +70,14 @@ Before significant planning, ticket creation, docs, or code changes:
 3. Continue to implementation only if there is an approved HAIF \`Decision\` and no unresolved conflict.
 4. If alignment is missing, create a HAIF \`Proposal\` instead of starting implementation.
 5. If solution details are unclear, create or update a HAIF \`Design\`.
-6. If implementation changes scope, APIs, data models, security, or architecture, stop and request human review.
+6. Put new agent-created docs in the matching HAIF stage folder: \`proposals\`, \`designs\`, or \`decisions\`, with an app/workstream subfolder when useful.
+7. If a doc, ticket, design, or implementation drifts from an approved \`Decision\`, treat the \`Decision\` as source of truth and create a drift conflict:
+
+   \`\`\`bash
+   haif drift-conflict --app=app-name --decision=decision-id --artifact=doc-or-change-id --summary="Short reviewer-focused drift summary."
+   \`\`\`
+
+8. Try to correct the draft, doc, ticket, or implementation back to the approved decision. If the decision itself may need to change, stop and request human review.
 
 Agents may create proposals and draft designs, but humans approve decisions before implementation.
 `;
@@ -95,6 +102,8 @@ export function main(args: string[]): number {
         return exportContext(rest);
       case "resolve-conflict":
         return resolveConflict(rest);
+      case "drift-conflict":
+        return createDriftConflict(rest);
       case "-h":
       case "--help":
       case undefined:
@@ -166,10 +175,37 @@ function createRecord(args: string[]): number {
 
   const scopeValue = app ? `[${slug(app)}]` : "[]";
   const relatedValue = related ? `[${related.split(",").map((value) => value.trim()).filter(Boolean).join(", ")}]` : "[]";
-  const content = `---\ntype: ${type}\nid: ${id}\ntitle: ${title}\ntldr: Summarize what reviewers need to know and what decision is needed.\nstatus: ${type === "Intent" ? "accepted" : "proposed"}\nowner: unassigned\ncreated_by: human\ncreated_at: ${now}\nupdated_at: ${now}\nsource: local\nscope: ${scopeValue}\nrelated: ${relatedValue}\nreviewers: []\nconfidence: draft\n---\n\n# ${title}\n\nDescribe the work, context, and review needs.\n`;
+  const content = recordContent(type, id, title, "Summarize what reviewers need to know and what decision is needed.", type === "Intent" ? "accepted" : "proposed", now, scopeValue, relatedValue);
   writeFileSync(path, content, "utf8");
   console.log(`Created ${path}`);
   return 0;
+}
+
+function createDriftConflict(args: string[]): number {
+  const decision = requiredOption(args, "decision");
+  const artifact = requiredOption(args, "artifact");
+  const app = requiredOption(args, "app");
+  const summary = requiredOption(args, "summary");
+  const title = `Drift in ${artifact} from ${decision}`;
+  const id = `conflict-${slug(title)}`;
+  const now = new Date().toISOString();
+  const directory = join(recordsDir(), recordFolders.Conflict, slug(app));
+  mkdirSync(directory, { recursive: true });
+  const path = join(directory, `${id}.md`);
+  if (existsSync(path)) throw new Error(`Record already exists: ${path}`);
+  const tldr = `${artifact} appears to drift from approved decision ${decision}. ${summary}`;
+  const content = driftConflictContent(id, title, tldr, now, slug(app), decision, artifact, summary);
+  writeFileSync(path, content, "utf8");
+  console.log(`Created drift conflict ${path}`);
+  return 0;
+}
+
+function driftConflictContent(id: string, title: string, tldr: string, now: string, app: string, decision: string, artifact: string, summary: string): string {
+  return `---\ntype: Conflict\nid: ${id}\ntitle: ${title}\ntldr: ${tldr}\nstatus: blocked\nowner: unassigned\ncreated_by: agent\ncreated_at: ${now}\nupdated_at: ${now}\nsource: local\nscope: [${app}]\nrelated: [${decision}, ${artifact}]\nreviewers: []\nconfidence: draft\n---\n\n# ${title}\n\n## TLDR\n\n${tldr}\n\n## Source Of Truth\n\n- Approved decision: \`${decision}\`\n- Drifted artifact: \`${artifact}\`\n- App or workstream: \`${app}\`\n\nThe approved HAIF \`Decision\` remains the source of truth until a human reviewer approves a new decision.\n\n## Observed Drift\n\n${summary}\n\n## Agent Action\n\n1. Compare the artifact with the approved decision.\n2. If possible, correct the artifact back to the decision.\n3. If correction would change scope, API, data model, security, ownership, or architecture, stop and request human review.\n4. Do not edit the approved decision directly.\n\n## Human Review Needed\n\n- Should the artifact be corrected to match the decision?\n- Should a new proposal or design be created to change the approved direction?\n- Should this conflict be resolved with \`haif resolve-conflict\` after review?\n`;
+}
+
+function recordContent(type: RecordType, id: string, title: string, tldr: string, status: string, now: string, scopeValue: string, relatedValue: string, createdBy = "human"): string {
+  return `---\ntype: ${type}\nid: ${id}\ntitle: ${title}\ntldr: ${tldr}\nstatus: ${status}\nowner: unassigned\ncreated_by: ${createdBy}\ncreated_at: ${now}\nupdated_at: ${now}\nsource: local\nscope: ${scopeValue}\nrelated: ${relatedValue}\nreviewers: []\nconfidence: draft\n---\n\n# ${title}\n\nDescribe the work, context, and review needs.\n`;
 }
 
 function validate(): number {
@@ -517,6 +553,7 @@ Usage:
   haif detect-overlap
   haif review-status
   haif export-context [--scope=a,b]
+  haif drift-conflict --app=name --decision=decision-id --artifact=design-or-doc-id --summary="..."
   haif resolve-conflict <conflict-id> --outcome=resolved --summary="..." --reviewer="..."`);
 }
 

@@ -37,7 +37,14 @@ Before significant planning, ticket creation, docs, or code changes:
 3. Continue to implementation only if there is an approved HAIF `Decision` and no unresolved conflict.
 4. If alignment is missing, create a HAIF `Proposal` instead of starting implementation.
 5. If solution details are unclear, create or update a HAIF `Design`.
-6. If implementation changes scope, APIs, data models, security, or architecture, stop and request human review.
+6. Put new agent-created docs in the matching HAIF stage folder: `proposals`, `designs`, or `decisions`, with an app/workstream subfolder when useful.
+7. If a doc, ticket, design, or implementation drifts from an approved `Decision`, treat the `Decision` as source of truth and create a drift conflict:
+
+   ```bash
+   haif drift-conflict --app=app-name --decision=decision-id --artifact=doc-or-change-id --summary="Short reviewer-focused drift summary."
+   ```
+
+8. Try to correct the draft, doc, ticket, or implementation back to the approved decision. If the decision itself may need to change, stop and request human review.
 
 Agents may create proposals and draft designs, but humans approve decisions before implementation.
 """.format(marker=HAIF_AGENT_SECTION_MARKER)
@@ -119,6 +126,58 @@ def create_record(record_type: str, title: str, root: Optional[Path] = None, app
         "---\n\n"
         "# {title}\n\n"
         "Describe the work, context, and review needs.\n".format(type=normalized, id=record_id, title=title, status=status, now=now, scope=scope_value, related=related_value),
+        encoding="utf-8",
+    )
+    return path
+
+
+def create_drift_conflict(app: str, decision: str, artifact: str, summary: str, root: Optional[Path] = None) -> Path:
+    init_records(root)
+    title = "Drift in {} from {}".format(artifact, decision)
+    record_id = "conflict-{}".format(slug(title))
+    now = datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+    directory = records_dir(root) / RECORD_FOLDERS["Conflict"] / slug(app)
+    directory.mkdir(parents=True, exist_ok=True)
+    path = directory / "{}.md".format(record_id)
+    if path.exists():
+        raise ValueError("Record already exists: {}".format(path))
+    tldr = "{} appears to drift from approved decision {}. {}".format(artifact, decision, summary)
+    path.write_text(
+        "---\n"
+        "type: Conflict\n"
+        "id: {id}\n"
+        "title: {title}\n"
+        "tldr: {tldr}\n"
+        "status: blocked\n"
+        "owner: unassigned\n"
+        "created_by: agent\n"
+        "created_at: {now}\n"
+        "updated_at: {now}\n"
+        "source: local\n"
+        "scope: [{app}]\n"
+        "related: [{decision}, {artifact}]\n"
+        "reviewers: []\n"
+        "confidence: draft\n"
+        "---\n\n"
+        "# {title}\n\n"
+        "## TLDR\n\n"
+        "{tldr}\n\n"
+        "## Source Of Truth\n\n"
+        "- Approved decision: `{decision}`\n"
+        "- Drifted artifact: `{artifact}`\n"
+        "- App or workstream: `{app}`\n\n"
+        "The approved HAIF `Decision` remains the source of truth until a human reviewer approves a new decision.\n\n"
+        "## Observed Drift\n\n"
+        "{summary}\n\n"
+        "## Agent Action\n\n"
+        "1. Compare the artifact with the approved decision.\n"
+        "2. If possible, correct the artifact back to the decision.\n"
+        "3. If correction would change scope, API, data model, security, ownership, or architecture, stop and request human review.\n"
+        "4. Do not edit the approved decision directly.\n\n"
+        "## Human Review Needed\n\n"
+        "- Should the artifact be corrected to match the decision?\n"
+        "- Should a new proposal or design be created to change the approved direction?\n"
+        "- Should this conflict be resolved with `haif resolve-conflict` after review?\n".format(id=record_id, title=title, tldr=tldr, now=now, app=slug(app), decision=decision, artifact=artifact, summary=summary),
         encoding="utf-8",
     )
     return path
