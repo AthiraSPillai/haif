@@ -20,15 +20,13 @@ This creates `.haif/records` with stage-specific folders and creates or updates 
 ```text
 .haif/
   records/
-    signals/
     proposals/
     designs/
     decisions/
-    tasks/
-    reviews/
     conflicts/
-    agent-runs/
 ```
+
+HAIF starts with three working stages plus `conflicts` as the guardrail folder. Optional extension folders are created later only if the team uses those record types.
 
 ## Create A Proposal
 

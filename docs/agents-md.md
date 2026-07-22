@@ -28,6 +28,7 @@ your-repo/
       proposals/
       designs/
       decisions/
+      conflicts/
 ```
 
 ## What It Does

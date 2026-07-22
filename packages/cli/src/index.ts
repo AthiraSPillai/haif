@@ -57,6 +57,12 @@ const recordFolders: Record<RecordType, string> = {
   Conflict: "conflicts",
   AgentRun: "agent-runs",
 };
+const defaultInitFolders = [
+  recordFolders.Proposal,
+  recordFolders.Design,
+  recordFolders.Decision,
+  recordFolders.Conflict,
+];
 const haifAgentSectionMarker = "<!-- HAIF_AGENT_WORKFLOW -->";
 const haifAgentSection = `${haifAgentSectionMarker}
 ## HAIF Workflow
@@ -135,7 +141,7 @@ function conflictReportsPath(): string {
 function init(): number {
   mkdirSync(recordsDir(), { recursive: true });
   mkdirSync(reportsDir(), { recursive: true });
-  for (const folder of Object.values(recordFolders)) {
+  for (const folder of defaultInitFolders) {
     mkdirSync(join(recordsDir(), folder), { recursive: true });
   }
   const agentPath = resolve(process.cwd(), "AGENTS.md");

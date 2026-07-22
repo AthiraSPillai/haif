@@ -24,6 +24,12 @@ RECORD_FOLDERS = {
     "Conflict": "conflicts",
     "AgentRun": "agent-runs",
 }
+DEFAULT_INIT_FOLDERS = [
+    RECORD_FOLDERS["Proposal"],
+    RECORD_FOLDERS["Design"],
+    RECORD_FOLDERS["Decision"],
+    RECORD_FOLDERS["Conflict"],
+]
 HAIF_AGENT_SECTION_MARKER = "<!-- HAIF_AGENT_WORKFLOW -->"
 HAIF_AGENT_SECTION = """{marker}
 ## HAIF Workflow
@@ -73,7 +79,7 @@ def init_records(root: Optional[Path] = None) -> Path:
     directory = records_dir(root)
     directory.mkdir(parents=True, exist_ok=True)
     reports_dir(root).mkdir(parents=True, exist_ok=True)
-    for folder in RECORD_FOLDERS.values():
+    for folder in DEFAULT_INIT_FOLDERS:
         (directory / folder).mkdir(parents=True, exist_ok=True)
     ensure_agents_md(root)
     return directory

@@ -259,7 +259,7 @@ For a small pilot, start with only three record types:
 - `Design`: proposed approach, options, tradeoffs, and risks.
 - `Decision`: reviewed direction that agents and humans can treat as current.
 
-Add optional extension records after the team has used this for a few real tasks.
+HAIF also creates a `conflicts` folder by default because drift and duplicate work can happen at any point. Add optional extension records after the team has used this for a few real tasks.
 
 ## Tutorial: Updating An API With HAIF
 
@@ -287,7 +287,6 @@ AGENTS.md
     designs/
     decisions/
     conflicts/
-    agent-runs/
 ```
 
 ### 2. Start With A Proposal
@@ -464,15 +463,13 @@ HAIF keeps records in stage-specific folders so teams do not end up with one lar
 ```text
 .haif/
   records/
-    signals/
     proposals/
     designs/
     decisions/
-    tasks/
-    reviews/
     conflicts/
-    agent-runs/
 ```
+
+`haif init` creates only these default folders. HAIF can still create optional extension folders later, such as `agent-runs`, `tasks`, `reviews`, `signals`, or `intents`, if the team chooses to use those record types.
 
 `haif new proposal "Title"` creates a file under `.haif/records/proposals/`.
 
